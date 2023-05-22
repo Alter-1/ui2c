@@ -1,0 +1,236 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+  <head>
+    <title>UART-to-I2C on Arduino</title>
+  </head>
+  <body align="center">
+
+<center><h3>UART-to-I2C on Arduino</h3></center>
+
+<p>
+Origin: <a href="https://alter.org.ua/en/soft/arduino/ui2c/">https://alter.org.ua/en/soft/arduino/ui2c/</a>
+</p>
+
+<p>
+Arduino firmware implementing <b>I2C Master</b> mode with following features
+</p>
+<ul>
+  <li>3 protocols over USB UART (115200 8N1)
+    <ul>
+      <li><a href="#raw">RAW</a> (data length + address (1 or 2 bytes) and data itself, all in I2C bus format)
+      <li><a href="https://coptonix.com/wp-content/uploads/2020/08/i2crs232slave.pdf">Coptonix #020101</a>-like (Master mode), <a href="#coptonix">see below</a>
+      <li><a href="manual">manual</a>: local echo, console commands, data in HEX, built-in bus scaner
+    </ul>
+  <li>7/10 bit I2C address support
+  <li>data length up to 255 bytes
+  <li>python adapter class, implementing <b>i2c_msg</b> from <b>smbus2.SMBus</b> to simplify integration with I2C/smbus applications and/or porting from Raspbery to Linux/Windows
+      <a name="ui2c.py">ui2c.py</a>
+  <li>build-in logging feature in RAW mode, doesn't interfere with regular data flow
+</ul>
+
+
+<a name="raw"></a>
+<center><h3>RAW mode (default) packet format</h3></center>
+
+<ul>
+  <li><a href="#write">Write UART -&gt; I2C</a>
+  <li><a href="#read">Read I2C -&gt; UART</a>
+  <li><a href="mgmt">I2C Bus management</a>
+  <li><a href="reply">Reply format</a>
+  <li><a href="err">UI2C Erros</a>
+  <li><a href="wr">Addressed read</a>, e.g. Write CMD + Read
+  <li><a href="example">Examples</a>
+</ul>
+
+<a name="write"></a>
+<center><h4>Write UART -&gt; I2C, RD=0</h4></center>
+
+<pre class="code">
+ <b>WRITE</b> RD=0
+
+ * 8bit data length (doesn't include address)
+
+ *  7bit address: adr7+R/W
+ *     xxxxxxx r/w 
+ * 10bit address: 11110 adr2+R/W Ack adr8
+ *     11110xx r/w xxxxxxxx
+
+ * data bytes
+</pre>
+
+<a name="read"></a>
+<center><h4>Request Read I2C -&gt; UART, RD=1</h4></center>
+
+<pre class="code">
+<b>READ</b>  RD=1
+
+ * 8bit data length (doesn't include address), always 1 since data contains requested length
+
+ *  7bit address: adr7+RD
+ *     xxxxxxx r/w 
+ * 10bit address: 11110 adr2+RD Ack adr8
+ *     11110xx r/w xxxxxxxx
+
+ * requested length (1 byte)
+</pre>
+
+<a name="mgmt"></a>
+<center><h4>I2C Bus management</h4></center>
+
+<p>
+For management purposes we use request packets with <i>invalid</i> <b>0xff address</b> with following command sequence
+</p>
+
+<pre class="code">
+<b>Mode - 0xff</b>
+0x01 0xff <b>0xff</b> <i>mode</i>
+  mode: 0 - RAW
+        1 - Coptonix
+        2 - Manual
+
+<b>Transaction - 0xfe</b>
+0x01 0xff <b>0xfe</b> <i>on/off</i>
+        0 - end transaction
+        1 - begon transaction
+
+<b>Log level - 0xfd</b>
+0x01 0xff <b>0xfd</b> <i>level</i>
+        0 - disabled
+        1 - enabled (2 and higher reserved)
+</pre>
+
+<p>
+Converter expects 1st byte with <b>data length</b>. Then it reads 1st address byte and 2nd one if necessary. Then all data bytes are read ans sent to specified I2C device.
+If data flow interrupts for more than CMD_TIMEOUT (1sec) controllers treats is as error and drops all previously received data.
+</p>
+<p>
+It is possible to change converter mode manually with the following trick. In timeout condition input buffer is checked against several manual commands. If none is
+matched, all data is dropped.
+</p>
+
+<pre class="code">
+mode=coptonix
+mode=manual
+version?
+</pre>
+
+<a name="reply"></a>
+<center><h4>UI2C Reply format</h4></center>
+
+<pre class="code">
+ * 8bit <b>data length</b> for packets of 1-0xef bytes
+ *     or
+ * 0xff length for packets of 0xf0-0xff bytes
+ *     or
+ * 0xff <b>error code</b> (see below)
+
+ * data bytes (for READ requests only)
+</pre>
+
+<a name="err"></a>
+<center><h4>UI2C Erros</h4></center>
+
+<pre class="code">
+1:  data too long  (should not happen)
+2:  NACK addr      (no such device)
+3:  NACK data      (data transmission aborted)
+4:  unknown
+5:  timeout
+</pre>
+
+<a name="wr"></a>
+<center><h4>I2C Bus addressed read</h4></center>
+
+<p>
+Master device often sends some command (or address) to Slave device and expect some reply. In order to keep bus acquired between WRITE and READ requests special
+sequence for begin/end transaction is used. By default READ and WRITE release bus imediately after completion
+</p>
+
+<a name="example"></a>
+<pre class="code">
+&gt; 0x01 0xff <b>0xfe</b> 0x01     begin transaction
+&lt; <i>no reply</i>
+
+&gt; 0x01 0x16 0x2f                        send 1 byte (0x2f) to device 0x0b (=0x16/2)
+&lt; 0x01                                  1 byte sent
+
+&gt; 0x01 0x17 0x20                        request read up to 0x20 bytes from device 0x0b 
+                                                           (=0x17/2, lower bit means READ)
+&lt; 0x20 0xXX 0xXX .... 0xXX              0x20 bytes received + data itself
+
+&gt; 0x01 0xff <b>0xfe</b> 0x00     end transaction
+&lt; <i>no reply</i>
+</pre>
+
+<center><h4>Error reporting</h4></center>
+
+<pre class="code">
+&gt; 0x01 0xff <b>0xfe</b> 0x01     begin transaction
+&lt; <i>no reply</i>
+
+&gt; 0x02 0x16 0x22 0x3e                   send 2 byte (0x22 0x3e) to device 0x0b (=0x16/2)
+&lt; 0xff 0x03                             Error (0xff) NACK data (0x03) - device rejected request
+
+&gt; 0x01 0xff <b>0xfe</b> 0x00     end transaction
+&lt; <i>no reply</i>
+</pre>
+
+<a name="coptonix"></a><a name="manual"></a>
+<center><h3>Manual, Coptonix</h3></center>
+
+<p>
+Manual mode differs only in extended comamnd set and local echo
+</p>
+
+<table border=1>
+  <tr><th>request</th><th>action</th><th>Coptonix reply</th><th>Manual reply</th></tr>
+  <tr><td>a&lt;CR&gt;</td><td>get remote I2C device address</td><td>aXX&lt;CR&gt;</td><td>Dst Address: XXX&lt;CR&gt;</td></tr>
+  <tr><td>cXXX&lt;CR&gt;</td><td>set remote I2C device address</td><td>c&lt;CR&gt;<td>OK&lt;CR&gt;</td></td></tr>
+  <tr><td>s&lt;CR&gt;</td><td>save remote I2C device address in EEPROM and make it default</td><td>s&lt;CR&gt;<td>OK&lt;CR&gt;</td></td></tr>
+  <tr><td>wXXX...XXXX&lt;CR&gt;</td><td>write date to remote device</td><td>w&lt;CR&gt;</td><td>Status string&lt;CR&gt;</td></td></tr>
+  <tr><td>xXXX...XXXX&lt;CR&gt;</td><td>write date to remote device and wait for reply</td>
+        <td>x&lt;CR&gt;[iXXX...XXX]&lt;CR&gt;<td>Formatted hex dump</status&lt;CR&gt;</td></tr>
+
+  <tr><th colspan=4>Manual / Non-standard extension</th></tr>
+  <tr><td>xNN,XXX...XXXX&lt;CR&gt;</td><td>write date to remote device and wait for reply, limit to NN bytes</td>
+        <td><br>x&lt;CR&gt;[iXXX...XXX]&lt;CR&gt;</td><td>Formatted hex dump</status&lt;CR&gt;</td></tr>
+  <tr><td>r&lt;CR&gt;</td><td>switch to <b>RAW</b> mode</td><td colspan=2>UI2C vX.X RAW mode&lt;CR&gt;</td></tr>
+  <tr><td>m&lt;CR&gt;</td><td>switch to <b>Manual</b> mode</td><td colspan=2>UI2C vX.X Manual mode&lt;CR&gt;</td></tr>
+  <tr><td><b>l</b>N&lt;CR&gt;</td><td>set log level to N</td><td colspan=2>Logging ON&lt;CR&gt;<br>or nothing</td></tr>
+  <tr><td>?&lt;CR&gt;</td><td>scan I2C bus</td><td colspan=2>formatted list of devices</td></tr>
+  <tr><td>v&lt;CR&gt;</td><td>get FW revision</td><td colspan=2>UI2C vX.X&lt;CR&gt;</td></tr>
+</table>
+
+<center>
+<h3>Python smbus2/i2c compatibility</h3>
+</center>
+
+<p>
+Class <b>ui2c</b> is minimal replacement for <b>smbus2</b> class and has same interface. Is makes easier adding compatiblity layer to existing applications.
+</p>
+
+<pre class="code">
+    <font color="gray"># replaced imports
+    #import smbus2
+    #from smbus2 import i2c_msg</font>
+
+    import <b>ui2c</b>
+    from <b>ui2c</b> import <b>i2c_msg</b>
+
+    <font color="gray"># open port</font>
+    bus = <b>ui2c.UartI2C</b>(dev_name, speed)
+
+    <font color="gray"># prepare write packet with command</font>
+    part_write = i2c_msg.write(dev_addr, [cmd.value])
+    
+    <font color="gray"># prepare reply request (read) packet</font>
+    part_read = i2c_msg.read(dev_addr, 2 + (1 if bus.pec else 0))
+
+    <font color="gray"># write command and wait for reply in single transaction</font>
+    bus.i2c_rdwr(part_write, part_read)
+    b = bytes(part_read)
+
+</pre>
+
+  </body>
+</html>

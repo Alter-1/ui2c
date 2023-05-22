@@ -13,3 +13,4 @@ Features:
 * build-in logging feature in RAW mode, doesn't interfere with regular data flow 
     
 Origin: https://alter.org.ua/en/soft/arduino/ui2c/
+uses WireZeroCopy I2C library (https://github.com/Alter-1/WireZeroCopy/)
