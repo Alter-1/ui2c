@@ -30,14 +30,14 @@ void i2c_msg_read(struct i2c_msg* msg, int address, int length) {
     msg->addr = (uint16_t)address;
     msg->flags = I2C_M_RD;
     msg->len = (uint16_t)length;
-    msg->buf = (char*)malloc(length * sizeof(uint8_t));
+    msg->buf = (uint8_t*)malloc(length * sizeof(uint8_t));
 }
 
 void i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length) {
     msg->addr = (uint16_t)address;
     msg->flags = 0;
     msg->len = (uint16_t)length;
-    msg->buf = (char*)malloc(length * sizeof(uint8_t));
+    msg->buf = (uint8_t*)malloc(length * sizeof(uint8_t));
     memcpy(msg->buf, data, length);
 }
 
