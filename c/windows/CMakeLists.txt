@@ -14,6 +14,7 @@ set(TEST_SOURCES
 include_directories(
     .
     ../../arduino
+    ../inc
     ../..
 )
 

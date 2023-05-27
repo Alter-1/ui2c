@@ -4,8 +4,10 @@
 #include <stdint.h>
 #include <Windows.h>
 #include <winioctl.h>
+#include <ui2c.h>
 #include <usb-i2c.h>
 
+/*
 // Function to convert I2C_TRANSFER_S to i2c_msg
 void i2c_transfer_to_i2c_msg(I2C_TRANSFER_S* transfer, struct i2c_msg* msg) {
     msg->addr = (uint16_t)transfer->Address;
@@ -22,19 +24,20 @@ void i2c_msg_to_i2c_transfer(struct i2c_msg* msg, I2C_TRANSFER_S* transfer) {
     transfer->Length = (ULONG)msg->len;
     transfer->Buffer = msg->buf;
 }
+*/
 
 void i2c_msg_read(struct i2c_msg* msg, int address, int length) {
-    msg->addr = address;
+    msg->addr = (uint16_t)address;
     msg->flags = I2C_M_RD;
-    msg->len = length;
-    msg->buf = (uint8_t*)malloc(length * sizeof(uint8_t));
+    msg->len = (uint16_t)length;
+    msg->buf = (char*)malloc(length * sizeof(uint8_t));
 }
 
 void i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length) {
-    msg->addr = address;
+    msg->addr = (uint16_t)address;
     msg->flags = 0;
-    msg->len = length;
-    msg->buf = (uint8_t*)malloc(length * sizeof(uint8_t));
+    msg->len = (uint16_t)length;
+    msg->buf = (char*)malloc(length * sizeof(uint8_t));
     memcpy(msg->buf, data, length);
 }
 
@@ -85,7 +88,7 @@ DWORD get_dcb_baudrate(int baudrate) {
         // Add more cases for different baud rates as needed
         default:
             printf("Unsupported baud rate\n");
-            return -1;
+            return (DWORD)-1;
     }
 }
 
@@ -145,7 +148,7 @@ HANDLE ui2c_open(const char* dev_name, int speed) {
     if (!SetCommTimeouts(hSerial, &timeouts)) {
         printf("Failed to set serial port timeouts\n");
         CloseHandle(hSerial);
-        return 1;
+        return INVALID_HANDLE_VALUE;
     }
 
     return hSerial;
@@ -161,7 +164,7 @@ int ui2c_probe(HANDLE hSerial, const char* command) {
     Sleep(1500); // Wait for device to start up
 
     DWORD bytesWritten, bytesRead;
-    if (!WriteFile(hSerial, command, strlen(command), &bytesWritten, NULL)) {
+    if (!WriteFile(hSerial, command, (DWORD)strlen(command), &bytesWritten, NULL)) {
         printf("Failed to write to UART\n");
         return 0;
     }
@@ -200,8 +203,8 @@ unsigned char *ui2c_msg_to_raw(struct i2c_msg *msg) {
         return NULL;
     }
 
-    unsigned char length = msg->len + 1;
-    unsigned char addr = msg->addr;
+    unsigned int  length = msg->len + 1;
+    uint16_t addr = msg->addr;
     unsigned char bRead = 0;
 
     if ((msg->flags & I2C_M_RD) == I2C_M_RD) {
@@ -213,7 +216,7 @@ unsigned char *ui2c_msg_to_raw(struct i2c_msg *msg) {
     }
 
     unsigned char *b = (uint8_t*)malloc((length + 1) * sizeof(uint8_t));
-    b[0] = msg->len;
+    b[0] = (uint8_t)msg->len;
 
     unsigned char i = 0;
     unsigned char n = 0;
@@ -229,7 +232,7 @@ unsigned char *ui2c_msg_to_raw(struct i2c_msg *msg) {
 
     if (bRead == 1) {
         b[0] = 1;
-        b[i] = msg->len;
+        b[i] = (uint8_t)msg->len;
     } else {
         while (i <= length) {
             unsigned char d = (unsigned char)msg->buf[n];
@@ -254,7 +257,7 @@ void ui2c_enable_logging(HANDLE hSerial, unsigned char uLevel) {
     WriteFile(hSerial, b, sizeof(b), &bytesWritten, NULL);
 }
 
-void ui2c_rdwr(HANDLE hSerial, i2c_msg** msgs, int num_msgs) {
+void ui2c_rdwr(HANDLE hSerial, struct i2c_msg** msgs, int num_msgs) {
     // End previous transaction if any
     ui2c_start_stop(hSerial, 0);
 
@@ -264,7 +267,7 @@ void ui2c_rdwr(HANDLE hSerial, i2c_msg** msgs, int num_msgs) {
     unsigned char* reply = NULL;
 
     for (int i = 0; i < num_msgs; i++) {
-        i2c_msg* msg = msgs[i];
+        struct i2c_msg* msg = msgs[i];
 
         unsigned char* b = ui2c_msg_to_raw(msg);
         int send_len = b[0] + 2;
@@ -273,13 +276,13 @@ void ui2c_rdwr(HANDLE hSerial, i2c_msg** msgs, int num_msgs) {
             send_len += 1;
         }
 
+        DWORD bytesRead;
         DWORD bytesWritten;
         WriteFile(hSerial, b, send_len, &bytesWritten, NULL);
         free(b);
 
         while (1) {
             unsigned char a;
-            DWORD bytesRead;
             if (!ReadFile(hSerial, &a, 1, &bytesRead, NULL)) {
                 // Timeout
                 printf("UI2C communication timeout\n");
@@ -291,7 +294,7 @@ void ui2c_rdwr(HANDLE hSerial, i2c_msg** msgs, int num_msgs) {
 
             if (a == UI2C_RAW_LOG_PREFIX) {
                 char logstr[256];
-                DWORD bytesRead = 0;
+                bytesRead = 0;
                 if (!ReadFile(hSerial, logstr, sizeof(logstr) - 1, &bytesRead, NULL)) {
                     printf("UI2C communication timeout\n");
                     // Cleanup resources and handle the error
@@ -306,7 +309,7 @@ void ui2c_rdwr(HANDLE hSerial, i2c_msg** msgs, int num_msgs) {
 
             if (a == UI2C_RAW_ERR_PREFIX) {
                 unsigned char err;
-                DWORD bytesRead = 0;
+                bytesRead = 0;
                 if (!ReadFile(hSerial, &err, 1, &bytesRead, NULL)) {
                     printf("UI2C communication timeout\n");
                     // Cleanup resources and handle the error
@@ -347,7 +350,7 @@ void ui2c_rdwr(HANDLE hSerial, i2c_msg** msgs, int num_msgs) {
 
             if (msg->flags & I2C_M_RD) {
                 reply = (uint8_t*)malloc(length);
-                DWORD bytesRead = 0;
+                bytesRead = 0;
                 if (!ReadFile(hSerial, reply, length, &bytesRead, NULL)) {
                     printf("UI2C communication timeout\n");
                     // Cleanup resources and handle the error
