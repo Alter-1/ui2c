@@ -9,7 +9,7 @@ struct i2c_msg {
     uint16_t addr;
     uint16_t flags;
     uint16_t len;
-    char* buf;
+    uint8_t* buf;
 };
 
 #endif //I2C_M_RD
