@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "WireZ.h"
 #include <EEPROM.h>
+#include "usb-i2c.h"
 
 #ifndef UI2C_LOGGING
 #define UI2C_LOGGING  1
@@ -9,7 +10,8 @@
 #define Wire WireZ
 
 #define LED 13
-#define I2C_MAX_TRANSFER  255
+
+#define MAX_CMD_PREFIX    16
 #define bufSz             (I2C_MAX_TRANSFER*2)+2    // for Coptonix we need CMD + double size (for ASCII representation) + <CR>
 #define EOL "\n"
 #define EOL2 "\n\r"            // for logging/local echo
@@ -27,30 +29,23 @@
 #define cfgCrc           (EEPROM.length()-cfgCrcLen)
 
 // handled only by timeout 
-char    CMD_RAW_TO_COPTONIX[] = "mode=coptonix";  
-char    CMD_RAW_TO_MANUAL[]   = "mode=manual";
-char    CMD_VERSION[]         = "version?"; 
-char    VERSION_STR[]         = "UI2C v1.0";
+char    CMD_RAW_TO_COPTONIX[] = UI2C_CMD_RAW_TO_COPTONIX;
+char    CMD_RAW_TO_MANUAL[]   = UI2C_CMD_RAW_TO_MANUAL;
+char    CMD_VERSION[]         = UI2C_CMD_VERSION;
+char    VERSION_STR[]         = UI2C_VERSION_STR;
 
-uint8_t cmdbuffer[bufSz+1];               // UART input/output buffer
-uint8_t i2cbuffer[I2C_MAX_TRANSFER+1];    // I2C input buffer
+//uint8_t cmdbuffer[bufSz+1];               // UART input/output buffer
+//uint8_t i2cbuffer[I2C_MAX_TRANSFER+1];    // I2C input buffer
+// share UART and I2C buffers with short offset for non-command part to save some free memory
+uint8_t iobuffer[bufSz+1+MAX_CMD_PREFIX];
+#define i2cbuffer   iobuffer
+uint8_t* cmdbuffer = &(iobuffer[MAX_CMD_PREFIX]);
 
 int len = 0;                   // expected length of pcket ot be sent
 int pos = 0;                   // current position in input UART buffer
 int req_len = 0;               // requested length to be read
 int rpos = 0;                  // actually read from I2C bytes
 int in_transaction = 0;        // transaction depth, don't release bus until reach zero, see also UI2C_RAW_CMD_BEGIN
-
-#define MODE_RAW         0     // Raw mode, packet format:
-                               // <length><I2C addr>[<i2C addr2>]<data bytes>
-                               // <length><I2C addr + RD>[<i2C addr2>]<req length>
-                               // <length><0xff><CMD><params>
-                               // if reply data length is greater than 0xf0, it is passed as 0xff <length>
-                               // values 0xf0-0xff are not used for error codes
-
-                               // 1st byte <length> doesn't include itself and I2C addr, only data block (for RD=1 is always 1)
-#define MODE_Coptonix    1     // simulate Coptonix #020101 I2C RS232 Adapter, see https://coptonix.com/wp-content/uploads/2020/08/i2crs232slave.pdf
-#define MODE_Manual      2     // similar to MODE_Coptonix, but with local echo and option for I2C device reply size limit: x<hex len>,<data...>
 
 char bProgrammed = 0;
 char mode = MODE_RAW;
@@ -61,20 +56,6 @@ char bLogging = 0;
 int i2c_addr = 0xfe;
 uint32_t uart_speed = 115200;
 
-// reply
-#define UI2C_RAW_ERR_PREFIX    0xff     // some error occured, next byte contains error code (see Wire.endTransmission())  
-                                        // if reply data length is greater than 0xf0, it is passed as 0xff <length>
-                                        // values 0xf0-0xff are not used for error codes
-#define UI2C_RAW_LOG_PREFIX    0xfe     // UI2C log message, terminated with \n character, are sent when logging is enabled
-
-// request (starting from I2C addr)
-#define UI2C_RAW_CMD_PREFIX    0xff     // corresponds to invalid I2C address and used as special command prefix. Next byte is treated as command, see other UI2C_RAW_CMD_xxx below
-#define UI2C_RAW_CMD_MODE      0xff     // switch between RAW (native) and Coptonix #020101 mode. Next byte is treated as mode, see MODE_xxx                                        
-#define UI2C_RAW_CMD_BEGIN     0xfe     // acquire/release I2C bus for sequential transactions, next byte 0/1 treated as release(0)/acquire(1)                                      
-#define UI2C_RAW_CMD_LOG       0xfd     // change logging level. Next byte: 0 - disabled, 1 - enabled, 2+ - reserved
-
-//#define CMD_TIMEOUT       100  // 100 ms
-#define CMD_TIMEOUT       1000  // 1000 ms
 
 void setup() {
 
