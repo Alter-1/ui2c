@@ -13,17 +13,17 @@
 #include <usb-i2c.h>
 
 void i2c_msg_read(struct i2c_msg* msg, int address, int length) {
-    msg->addr = address;
+    msg->addr = (uint16_t)address;
     msg->flags = I2C_M_RD;
-    msg->len = length;
-    msg->buf = (uint8_t*)malloc(length * sizeof(char));
+    msg->len = (uint16_t)length;
+    msg->buf = (char*)malloc(length * sizeof(uint8_t));
 }
 
 void i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length) {
-    msg->addr = address;
+    msg->addr = (uint16_t)address;
     msg->flags = 0;
-    msg->len = length;
-    msg->buf = (uint8_t*)malloc(length * sizeof(char));
+    msg->len = (uint16_t)length;
+    msg->buf = (char*)malloc(length * sizeof(uint8_t));
     memcpy(msg->buf, data, length);
 }
 
@@ -156,8 +156,8 @@ unsigned char *ui2c_msg_to_raw(struct i2c_msg *msg) {
         return NULL;
     }
 
-    unsigned char length = msg->len + 1;
-    unsigned char addr = msg->addr;
+    unsigned int  length = msg->len + 1;
+    uint16_t addr = msg->addr;
     unsigned char bRead = 0;
 
     if ((msg->flags & I2C_M_RD) == I2C_M_RD) {
@@ -169,7 +169,7 @@ unsigned char *ui2c_msg_to_raw(struct i2c_msg *msg) {
     }
 
     unsigned char *b = (uint8_t*)malloc((length + 1) * sizeof(uint8_t));
-    b[0] = msg->len;
+    b[0] = (uint8_t)msg->len;
 
     unsigned char i = 0;
     unsigned char n = 0;
@@ -185,7 +185,7 @@ unsigned char *ui2c_msg_to_raw(struct i2c_msg *msg) {
 
     if (bRead == 1) {
         b[0] = 1;
-        b[i] = msg->len;
+        b[i] = (uint8_t)msg->len;
     } else {
         while (i <= length) {
             unsigned char d = (unsigned char)msg->buf[n];
