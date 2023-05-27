@@ -1,0 +1,174 @@
+See https://alter.org.ua/en/soft/arduino/ui2c/ for fresh info
+
+# RAW mode (default) packet format
+
+    Write UART -> I2C
+    Read I2C -> UART
+    I2C Bus management
+    Reply format
+    UI2C Erros
+    Addressed read, e.g. Write CMD + Read
+    Examples 
+
+# Write UART -> I2C, RD=0
+
+ WRITE RD=0
+
+ * 8bit data length (doesn't include address)
+
+ *  7bit address: adr7+R/W
+ *     xxxxxxx r/w 
+ * 10bit address: 11110 adr2+R/W Ack adr8
+ *     11110xx r/w xxxxxxxx
+
+ * data bytes
+
+# Request Read I2C -> UART, RD=1
+
+READ  RD=1
+
+ * 8bit data length (doesn't include address), always 1 since data contains requested length
+
+ *  7bit address: adr7+RD
+ *     xxxxxxx r/w 
+ * 10bit address: 11110 adr2+RD Ack adr8
+ *     11110xx r/w xxxxxxxx
+
+ * requested length (1 byte)
+
+# I2C Bus management
+
+For management purposes we use request packets with invalid 0xff address with following command sequence
+
+Mode - 0xff
+0x01 0xff 0xff mode
+  mode: 0 - RAW
+        1 - Coptonix
+        2 - Manual
+
+Transaction - 0xfe
+0x01 0xff 0xfe on/off
+        0 - end transaction
+        1 - begon transaction
+
+Log level - 0xfd
+0x01 0xff 0xfd level
+        0 - disabled
+        1 - enabled (2 and higher reserved)
+
+Converter expects 1st byte with data length. 
+Then it reads 1st address byte and 2nd one if necessary. Then all data bytes are read ans sent to specified I2C device. 
+If data flow interrupts for more than CMD_TIMEOUT (1sec) controllers treats is as error and drops all previously received data.
+
+It is possible to change converter mode manually with the following trick. In timeout condition input buffer is checked 
+against several manual commands. If none is matched, all data is dropped.
+
+mode=coptonix
+mode=manual
+version?
+
+# UI2C Reply format
+
+ * 8bit data length for packets of 1-0xef bytes
+ *     or
+ * 0xff length for packets of 0xf0-0xff bytes
+ *     or
+ * 0xff error code (see below)
+
+ * data bytes (for READ requests only)
+
+# UI2C Erros
+
+1:  data too long  (should not happen)
+2:  NACK addr      (no such device)
+3:  NACK data      (data transmission aborted)
+4:  unknown
+5:  timeout
+
+# I2C Bus addressed read
+
+Master device often sends some command (or address) to Slave device and expect some reply. 
+In order to keep bus acquired between WRITE and READ requests special sequence for begin/end transaction is used. 
+By default READ and WRITE release bus imediately after completion
+
+> 0x01 0xff 0xfe 0x01     begin transaction
+< no reply
+
+> 0x01 0x16 0x3f                        send 1 byte (0x3f) to device 0x0b (=0x16/2)
+< 0x01                                  1 byte sent
+
+> 0x01 0x17 0x20                        request read up to 0x20 bytes from device 0x0b 
+                                                           (=0x17/2, lower bit means READ)
+< 0x20 0xXX 0xXX .... 0xXX              0x20 bytes received + data itself
+
+> 0x01 0xff 0xfe 0x00     end transaction
+< no reply
+
+# Error reporting
+
+> 0x01 0xff 0xfe 0x01     begin transaction
+< no reply
+
+> 0x02 0x16 0x22 0x3e                   send 2 byte (0x22 0x3e) to device 0x0b (=0x16/2)
+< 0xff 0x03                             Error (0xff) NACK data (0x03) - device rejected request
+
+> 0x01 0xff 0xfe 0x00     end transaction
+< no reply
+
+# Command set: Manual, Coptonix
+
+-- Manual mode differs only in extended command set and local echo --
+request		action				Coptonix reply		Manual reply
+a<CR>		get remote I2C device address	aXX<CR>			Dst Address: XXX<CR>
+cXXX<CR>	set remote I2C device address	c<CR>			OK<CR>
+s<CR>		save remote I2C device address 
+		in EEPROM and make it default	s<CR>			OK<CR>
+wXXX...XXXX<CR>	write date to remote device	w<CR>			Status string<CR>
+xXXX...XXXX<CR>	write date to remote device 
+		and wait for reply 		x<CR>[iXXX...XXX]<CR>	Formatted hex dump
+-- Manual / Non-standard extension --
+xNN,XXX...XXXX<CR>	
+		write date to remote device
+		and wait for reply, limit 
+		to NN bytes 	
+x<CR>[iXXX...XXX]<CR>							Formatted hex dump
+r<CR>		switch to RAW mode					UI2C vX.X RAW mode<CR>
+m<CR>		switch to Manual mode					UI2C vX.X Manual mode<CR>
+lN<CR>		set log level to N					Logging ON<CR>
+									or nothing
+?<CR>		scan I2C bus						formatted list of devices
+v<CR>		get FW revision						UI2C vX.X<CR>
+
+# Manual Example
+
+version?                request version and wait ~1 sec
+UI2C v1.0
+mode=manual             switch to manual mode
+UI2C v1.0 Manual mode
+a                       get selected device
+Dst Address: fe
+w223e                   send bytes 0x22 0x3e
+Status: 2 NACK addr
+?                       scan bus
+Scanning...
+I2C device found at address 0x0B!
+done
+c0b                     select device 0x0b
+OK
+w223e                   send bytes 0x22 0x3e
+Status: 3 NACK data
+x10,3f                  send byte 0x2f and wait for reply up to 0x10 bytes
+Status: 0 OK                                                                    
+<
+58 0F 3F 3F 3F 3F 3F 3F
+3F 3F 3F 3F 3F 3F 3F 3F
+
+# Coptonix Example
+
+a                       get selected device
+aFE
+c0B                     select device 0x0b
+c
+w223E                   send bytes 0x22 3e
+w3F                     send byte 0x3f and wait for reply
+i5B0F3F3F3F3F3F3F....
