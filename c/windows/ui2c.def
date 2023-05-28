@@ -1,0 +1,17 @@
+;--------------------------------------------------------------
+; LIBPNG symbol list as a Win32 DEF file
+; Contains all the symbols that can be exported from ui2c
+;--------------------------------------------------------------
+LIBRARY
+
+EXPORTS
+ i2c_msg_read              @1
+ i2c_msg_write             @2
+ i2c_msg_free              @3
+ ui2c_openA                @4
+ ui2c_openW                @5
+ ui2c_close                @6
+ ui2c_probe                @7
+ probe_ui2c_device         @8
+ ui2c_enable_logging       @9
+ ui2c_rdwr                 @10

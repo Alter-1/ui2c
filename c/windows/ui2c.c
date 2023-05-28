@@ -6,6 +6,7 @@
 #include <winioctl.h>
 #include <ui2c.h>
 #include <usb-i2c.h>
+#include <ui2c.h>
 
 /*
 // Function to convert I2C_TRANSFER_S to i2c_msg
@@ -26,14 +27,16 @@ void i2c_msg_to_i2c_transfer(struct i2c_msg* msg, I2C_TRANSFER_S* transfer) {
 }
 */
 
-void i2c_msg_read(struct i2c_msg* msg, int address, int length) {
+DLL_EXPORT
+void __stdcall i2c_msg_read(struct i2c_msg* msg, int address, int length) {
     msg->addr = (uint16_t)address;
     msg->flags = I2C_M_RD;
     msg->len = (uint16_t)length;
     msg->buf = (uint8_t*)malloc(length * sizeof(uint8_t));
 }
 
-void i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length) {
+DLL_EXPORT 
+void __stdcall i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length) {
     msg->addr = (uint16_t)address;
     msg->flags = 0;
     msg->len = (uint16_t)length;
@@ -41,7 +44,8 @@ void i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length) {
     memcpy(msg->buf, data, length);
 }
 
-void i2c_msg_free(struct i2c_msg* msg) {
+DLL_EXPORT 
+void __stdcall i2c_msg_free(struct i2c_msg* msg) {
     free(msg->buf);
 }
 
@@ -92,14 +96,7 @@ DWORD get_dcb_baudrate(int baudrate) {
     }
 }
 
-HANDLE ui2c_open(const char* dev_name, int speed) {
-    HANDLE hSerial;
-
-    hSerial = CreateFileA(dev_name, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-    if (hSerial == INVALID_HANDLE_VALUE) {
-        printf("Failed to open UART\n");
-        return INVALID_HANDLE_VALUE;
-    }
+HANDLE _ui2c_open(HANDLE hSerial, int speed) {
 
     DCB dcbSerialParams = { 0 };
     COMMTIMEOUTS timeouts;
@@ -154,11 +151,37 @@ HANDLE ui2c_open(const char* dev_name, int speed) {
     return hSerial;
 }
 
-void ui2c_close(HANDLE hSerial) {
+DLL_EXPORT 
+HANDLE __stdcall ui2c_openA(const char* dev_name, int speed) {
+    HANDLE hSerial;
+
+    hSerial = CreateFileA(dev_name, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+    if (hSerial == INVALID_HANDLE_VALUE) {
+        printf("Failed to open UART\n");
+        return INVALID_HANDLE_VALUE;
+    }
+    return _ui2c_open(hSerial, speed);
+}
+
+DLL_EXPORT 
+HANDLE __stdcall ui2c_openW(const WCHAR* dev_name, int speed) {
+    HANDLE hSerial;
+
+    hSerial = CreateFileW(dev_name, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+    if (hSerial == INVALID_HANDLE_VALUE) {
+        printf("Failed to open UART\n");
+        return INVALID_HANDLE_VALUE;
+    }
+    return _ui2c_open(hSerial, speed);
+}
+
+DLL_EXPORT 
+void __stdcall ui2c_close(HANDLE hSerial) {
     CloseHandle(hSerial);
 }
 
-int ui2c_probe(HANDLE hSerial, const char* command) {
+DLL_EXPORT 
+int __stdcall ui2c_probe(HANDLE hSerial, const char* command) {
     char response[256] = {0};
 
     Sleep(1500); // Wait for device to start up
@@ -183,7 +206,8 @@ int ui2c_probe(HANDLE hSerial, const char* command) {
     }
 }
 
-int probe_ui2c_device(const char* dev_name, int speed, const char* command) {
+DLL_EXPORT 
+int __stdcall probe_ui2c_device(const char* dev_name, int speed, const char* command) {
     HANDLE hSerial = ui2c_open(dev_name, speed);
     if (hSerial == INVALID_HANDLE_VALUE) {
 
@@ -245,19 +269,22 @@ unsigned char *ui2c_msg_to_raw(struct i2c_msg *msg) {
     return b;
 }
 
-void ui2c_start_stop(HANDLE hSerial, unsigned char bStart) {
+DLL_EXPORT 
+void __stdcall ui2c_start_stop(HANDLE hSerial, unsigned char bStart) {
     unsigned char b[4] = {2, UI2C_RAW_CMD_PREFIX, UI2C_RAW_CMD_BEGIN, bStart};
     DWORD bytesWritten;
     WriteFile(hSerial, b, sizeof(b), &bytesWritten, NULL);
 }
 
-void ui2c_enable_logging(HANDLE hSerial, unsigned char uLevel) {
+DLL_EXPORT 
+void __stdcall ui2c_enable_logging(HANDLE hSerial, unsigned char uLevel) {
     unsigned char b[4] = {2, UI2C_RAW_CMD_PREFIX, UI2C_RAW_CMD_LOG, uLevel};
     DWORD bytesWritten;
     WriteFile(hSerial, b, sizeof(b), &bytesWritten, NULL);
 }
 
-void ui2c_rdwr(HANDLE hSerial, struct i2c_msg** msgs, int num_msgs) {
+DLL_EXPORT 
+void __stdcall ui2c_rdwr(HANDLE hSerial, struct i2c_msg** msgs, int num_msgs) {
     // End previous transaction if any
     ui2c_start_stop(hSerial, 0);
 
