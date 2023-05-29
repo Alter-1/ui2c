@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 project(ui2c_project)
 
+set(CMAKE_SUPPRESS_REGENERATION ON)
+set(CMAKE_USE_RELATIVE_PATHS ON)
+
 # Set the source files for the libraries and test application
 set(LIBRARY_SOURCES
     ui2c.c
