@@ -106,6 +106,9 @@ int ui2c_open(const char *dev_name, int speed) {
     options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
     options.c_oflag &= ~OPOST;
 
+    // Set the timeout value
+    options.c_cc[VTIME] = 10; // 1 second timeout (10 * 0.1 seconds)
+
     tcsetattr(fd, TCSANOW, &options);
 
     return fd;
