@@ -21,6 +21,11 @@ int main(int argc, char** argv) {
     if(uart_i2c == INVALID_HANDLE_VALUE)
         return -1;
 
+    if(!ui2c_probe(uart_i2c)) {
+        printf("Probe UI2C failed\n");
+        return -1;
+    }
+
     // Perform the i2c_rdwr operation
     struct i2c_msg* msgs[2] = { &msg1, &msg2 };
     ui2c_rdwr(uart_i2c, &msgs[0], 2);
