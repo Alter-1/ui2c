@@ -1,6 +1,7 @@
+#include <windows.h>
 #include <stdio.h>
 #include <stdint.h>
-#include "ui2c.h"
+#include <ui2c.h>
 
 int main(int argc, char** argv) {
     // Define the i2c_msgs
