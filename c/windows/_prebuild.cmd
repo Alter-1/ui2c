@@ -11,11 +11,11 @@ SET cur_dir2=%cur_dir:\=/%
 cd c\windows
 
 cd build32
-echo srchrep.EXE -src "%cur_dir%" -dest "$(SolutionDir)\..\..\..\" *.vcxproj.*
-echo srchrep.EXE -src "%cur_dir2%" -dest "$(SolutionDir)\..\..\..\" *.vcxproj.*
+..\srchrep.EXE -src "%cur_dir%" -dest "$(SolutionDir)\..\..\..\" *.vcxproj.*
+..\srchrep.EXE -src "%cur_dir2%" -dest "$(SolutionDir)\..\..\..\" *.vcxproj.*
 cd ..
 
 cd build64
-echo srchrep.EXE -src "%cur_dir%" -dest "$(SolutionDir)\..\..\..\" *.vcxproj.*
-echo srchrep.EXE -src "%cur_dir2%" -dest "$(SolutionDir)\..\..\..\" *.vcxproj.*
+..\srchrep.EXE -src "%cur_dir%" -dest "$(SolutionDir)\..\..\..\" *.vcxproj.*
+..\srchrep.EXE -src "%cur_dir2%" -dest "$(SolutionDir)\..\..\..\" *.vcxproj.*
 cd ..

@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "ui2c.h"
 
-int main() {
+int main(int argc, char** argv) {
     // Define the i2c_msgs
     struct i2c_msg msg1, msg2;
     int addr = 0x0b; // default DJI battery address
@@ -11,9 +11,13 @@ int main() {
     i2c_msg_read(&msg2, addr, 2);        // read hardware ID, 2 bytes
 
     // Initialize the UartI2C
-    int uart_i2c;
-    uart_i2c = ui2c_open("/dev/ttyUSB0", 115200);
-    if(uart_i2c <= 0)
+    F_HANDLE uart_i2c;
+    if(argc<2) {
+        printf("COM-port with UI2C adapter not specified\n");
+        return -1;
+    }
+    uart_i2c = ui2c_open(argv[1], 115200);
+    if(uart_i2c == INVALID_HANDLE_VALUE)
         return -1;
 
     // Perform the i2c_rdwr operation

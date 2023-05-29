@@ -59,25 +59,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">H:\Work\ui2c.git\c\windows\build64\bin\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\..\..\..\\c\windows\build64\bin\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ui2c_shared.dir\Debug\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">ui2c_shared</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.dll</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">H:\Work\ui2c.git\c\windows\build64\bin\Release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)\..\..\..\\c\windows\build64\bin\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ui2c_shared.dir\Release\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">ui2c_shared</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.dll</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">H:\Work\ui2c.git\c\windows\build64\bin\MinSizeRel\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">$(SolutionDir)\..\..\..\\c\windows\build64\bin\MinSizeRel\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">ui2c_shared.dir\MinSizeRel\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">ui2c_shared</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.dll</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">H:\Work\ui2c.git\c\windows\build64\bin\RelWithDebInfo\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">$(SolutionDir)\..\..\..\\c\windows\build64\bin\RelWithDebInfo\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">ui2c_shared.dir\RelWithDebInfo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">ui2c_shared</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.dll</TargetExt>
@@ -86,7 +86,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsC</CompileAs>
@@ -106,10 +106,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\";ui2c_shared_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -122,9 +122,9 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>H:/Work/ui2c.git/c/windows/build64/lib/Debug/ui2c_shared.lib</ImportLibrary>
-      <ModuleDefinitionFile>H:/Work/ui2c.git/c/windows/ui2c.def</ModuleDefinitionFile>
-      <ProgramDataBaseFile>H:/Work/ui2c.git/c/windows/build64/bin/Debug/ui2c_shared.pdb</ProgramDataBaseFile>
+      <ImportLibrary>$(SolutionDir)\..\..\..\/c/windows/build64/lib/Debug/ui2c_shared.lib</ImportLibrary>
+      <ModuleDefinitionFile>$(SolutionDir)\..\..\..\/c/windows/ui2c.def</ModuleDefinitionFile>
+      <ProgramDataBaseFile>$(SolutionDir)\..\..\..\/c/windows/build64/bin/Debug/ui2c_shared.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -133,7 +133,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <CompileAs>CompileAsC</CompileAs>
       <ExceptionHandling>
@@ -153,10 +153,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\";ui2c_shared_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -169,9 +169,9 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>H:/Work/ui2c.git/c/windows/build64/lib/Release/ui2c_shared.lib</ImportLibrary>
-      <ModuleDefinitionFile>H:/Work/ui2c.git/c/windows/ui2c.def</ModuleDefinitionFile>
-      <ProgramDataBaseFile>H:/Work/ui2c.git/c/windows/build64/bin/Release/ui2c_shared.pdb</ProgramDataBaseFile>
+      <ImportLibrary>$(SolutionDir)\..\..\..\/c/windows/build64/lib/Release/ui2c_shared.lib</ImportLibrary>
+      <ModuleDefinitionFile>$(SolutionDir)\..\..\..\/c/windows/ui2c.def</ModuleDefinitionFile>
+      <ProgramDataBaseFile>$(SolutionDir)\..\..\..\/c/windows/build64/bin/Release/ui2c_shared.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -180,7 +180,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <CompileAs>CompileAsC</CompileAs>
       <ExceptionHandling>
@@ -200,10 +200,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\";ui2c_shared_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -216,9 +216,9 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>H:/Work/ui2c.git/c/windows/build64/lib/MinSizeRel/ui2c_shared.lib</ImportLibrary>
-      <ModuleDefinitionFile>H:/Work/ui2c.git/c/windows/ui2c.def</ModuleDefinitionFile>
-      <ProgramDataBaseFile>H:/Work/ui2c.git/c/windows/build64/bin/MinSizeRel/ui2c_shared.pdb</ProgramDataBaseFile>
+      <ImportLibrary>$(SolutionDir)\..\..\..\/c/windows/build64/lib/MinSizeRel/ui2c_shared.lib</ImportLibrary>
+      <ModuleDefinitionFile>$(SolutionDir)\..\..\..\/c/windows/ui2c.def</ModuleDefinitionFile>
+      <ProgramDataBaseFile>$(SolutionDir)\..\..\..\/c/windows/build64/bin/MinSizeRel/ui2c_shared.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -227,7 +227,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <CompileAs>CompileAsC</CompileAs>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -246,10 +246,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\";ui2c_shared_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -262,9 +262,9 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>H:/Work/ui2c.git/c/windows/build64/lib/RelWithDebInfo/ui2c_shared.lib</ImportLibrary>
-      <ModuleDefinitionFile>H:/Work/ui2c.git/c/windows/ui2c.def</ModuleDefinitionFile>
-      <ProgramDataBaseFile>H:/Work/ui2c.git/c/windows/build64/bin/RelWithDebInfo/ui2c_shared.pdb</ProgramDataBaseFile>
+      <ImportLibrary>$(SolutionDir)\..\..\..\/c/windows/build64/lib/RelWithDebInfo/ui2c_shared.lib</ImportLibrary>
+      <ModuleDefinitionFile>$(SolutionDir)\..\..\..\/c/windows/ui2c.def</ModuleDefinitionFile>
+      <ProgramDataBaseFile>$(SolutionDir)\..\..\..\/c/windows/build64/bin/RelWithDebInfo/ui2c_shared.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -272,8 +272,8 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="H:\Work\ui2c.git\c\windows\ui2c.c" />
-    <None Include="H:\Work\ui2c.git\c\windows\ui2c.def" />
+    <ClCompile Include="$(SolutionDir)\..\..\..\\c\windows\ui2c.c" />
+    <None Include="$(SolutionDir)\..\..\..\\c\windows\ui2c.def" />
   </ItemGroup>
   <ItemGroup>
   </ItemGroup>
