@@ -42,8 +42,8 @@ DLL_EXPORT void __stdcall i2c_msg_free(struct i2c_msg* msg);
   DLL_EXPORT F_HANDLE __stdcall ui2c_open(const char *dev_name, int speed);
 #endif //WIN32
 DLL_EXPORT void __stdcall ui2c_close(F_HANDLE fd);
-DLL_EXPORT int  __stdcall ui2c_probe(F_HANDLE fd, const char *command);
-DLL_EXPORT int  __stdcall probe_ui2c_device(const char *dev_name, int speed, const char *command);
+DLL_EXPORT int  __stdcall ui2c_probe(F_HANDLE fd);
+DLL_EXPORT int  __stdcall probe_ui2c_device(const char *dev_name, int speed);
 DLL_EXPORT void __stdcall ui2c_enable_logging (F_HANDLE fd, unsigned char uLevel);
 DLL_EXPORT void __stdcall ui2c_rdwr(F_HANDLE fd, struct i2c_msg **msgs, int num_msgs);
 

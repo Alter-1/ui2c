@@ -79,14 +79,18 @@ speed_t get_termios_baudrate(int baudrate) {
 int ui2c_open(const char *dev_name, int speed) {
     int fd;
 
-    fd = open(dev_name, O_RDWR | O_NOCTTY | O_NONBLOCK);
+    fd = open(dev_name, O_RDWR | O_NOCTTY);
     if (fd < 0) {
         perror("Failed to open UART");
         return -1;
     }
 
     struct termios options;
-    tcgetattr(fd, &options);
+    if (tcgetattr(fd, &options) == -1) {
+        perror("Failed to get serial port attributes");
+        close(fd);
+        return -1;
+    }
 
     speed_t baudrate = get_termios_baudrate(speed);
     if (baudrate == (speed_t)-1) {
@@ -102,14 +106,22 @@ int ui2c_open(const char *dev_name, int speed) {
     options.c_cflag &= ~PARENB;
     options.c_cflag &= ~CSTOPB;
     options.c_cflag &= ~CSIZE;
+    options.c_cflag &= ~CRTSCTS; // Disable RTS/CTS hardware flow control (most common)
     options.c_cflag |= CS8;
-    options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+    options.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHONL | ISIG);
     options.c_oflag &= ~OPOST;
+    options.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
+    options.c_iflag &= ~(IXON | IXOFF | IXANY); // Turn off s/w flow ctrl
+    options.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL); // Disable any special handling of received bytes
 
     // Set the timeout value
     options.c_cc[VTIME] = 10; // 1 second timeout (10 * 0.1 seconds)
 
-    tcsetattr(fd, TCSANOW, &options);
+    if(tcsetattr(fd, TCSANOW, &options) == -1) {
+        perror("Failed to set serial port attributes");
+        close(fd);
+        return -1;
+    }
 
     return fd;
 }
@@ -118,12 +130,12 @@ void ui2c_close(int fd) {
     close(fd);
 }
 
-int ui2c_probe(int fd, const char *command) {
+int ui2c_probe(int fd) {
     char response[256] = {0};
 
     usleep(1500000); // Wait for device to start up
 
-    write(fd, command, strlen(command));
+    write(fd, UI2C_CMD_VERSION "\n", strlen(UI2C_CMD_VERSION)+1);
 
     ssize_t bytes_read = read(fd, response, sizeof(response) - 1);
     if (bytes_read < 0) {
@@ -140,14 +152,14 @@ int ui2c_probe(int fd, const char *command) {
     }
 }
 
-int probe_ui2c_device(const char *dev_name, int speed, const char *command) {
+int probe_ui2c_device(const char *dev_name, int speed) {
     int fd = ui2c_open(dev_name, speed);
     if (fd < 0) {
         printf("Failed to open UART\n");
         return 0;
     }
 
-    int result = ui2c_probe(fd, command);
+    int result = ui2c_probe(fd);
 
     ui2c_close(fd);
 

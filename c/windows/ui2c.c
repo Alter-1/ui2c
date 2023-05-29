@@ -181,13 +181,13 @@ void __stdcall ui2c_close(HANDLE hSerial) {
 }
 
 DLL_EXPORT 
-int __stdcall ui2c_probe(HANDLE hSerial, const char* command) {
+int __stdcall ui2c_probe(HANDLE hSerial) {
     char response[256] = {0};
 
     Sleep(1500); // Wait for device to start up
 
     DWORD bytesWritten, bytesRead;
-    if (!WriteFile(hSerial, command, (DWORD)strlen(command), &bytesWritten, NULL)) {
+    if (!WriteFile(hSerial, UI2C_CMD_VERSION, (DWORD)strlen(UI2C_CMD_VERSION), &bytesWritten, NULL)) {
         printf("Failed to write to UART\n");
         return 0;
     }
@@ -207,7 +207,7 @@ int __stdcall ui2c_probe(HANDLE hSerial, const char* command) {
 }
 
 DLL_EXPORT 
-int __stdcall probe_ui2c_device(const char* dev_name, int speed, const char* command) {
+int __stdcall probe_ui2c_device(const char* dev_name, int speed) {
     HANDLE hSerial = ui2c_open(dev_name, speed);
     if (hSerial == INVALID_HANDLE_VALUE) {
 
@@ -215,7 +215,7 @@ int __stdcall probe_ui2c_device(const char* dev_name, int speed, const char* com
         return 0;
     }
 
-    int result = ui2c_probe(hSerial, command);
+    int result = ui2c_probe(hSerial);
 
     ui2c_close(hSerial);
 
