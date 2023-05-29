@@ -20,6 +20,7 @@ struct i2c_msg {
 #else
  #define F_HANDLE    int
  #define DLL_EXPORT __attribute__((visibility("default")))
+ #define __stdcall 
 #endif //WIN32
 
 #ifdef __cplusplus
