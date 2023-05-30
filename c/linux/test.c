@@ -26,7 +26,7 @@ int main() {
     ui2c_rdwr(uart_i2c, &msgs[0], 2);
 
     // Print the received data
-    printf("Received ID: %x\n", *((uint16_t*)(msg2.buf)));
+    printf("Received ID: %4.4x\n", *((uint16_t*)(msg2.buf)));
 
     // Cleanup
     i2c_msg_free(&msg1);
