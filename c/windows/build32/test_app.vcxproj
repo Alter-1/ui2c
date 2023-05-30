@@ -59,25 +59,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">H:\Work\ui2c.git\c\windows\build32\bin\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\..\..\..\\c\windows\build32\bin\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">test_app.dir\Debug\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">test_app</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">H:\Work\ui2c.git\c\windows\build32\bin\Release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\..\..\..\\c\windows\build32\bin\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">test_app.dir\Release\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">test_app</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">H:\Work\ui2c.git\c\windows\build32\bin\MinSizeRel\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">$(SolutionDir)\..\..\..\\c\windows\build32\bin\MinSizeRel\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">test_app.dir\MinSizeRel\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">test_app</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">H:\Work\ui2c.git\c\windows\build32\bin\RelWithDebInfo\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">$(SolutionDir)\..\..\..\\c\windows\build32\bin\RelWithDebInfo\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">test_app.dir\RelWithDebInfo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">test_app</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">.exe</TargetExt>
@@ -86,7 +86,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsC</CompileAs>
@@ -106,10 +106,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -122,8 +122,8 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>H:/Work/ui2c.git/c/windows/build32/lib/Debug/test_app.lib</ImportLibrary>
-      <ProgramDataBaseFile>H:/Work/ui2c.git/c/windows/build32/bin/Debug/test_app.pdb</ProgramDataBaseFile>
+      <ImportLibrary>$(SolutionDir)\..\..\..\/c/windows/build32/lib/Debug/test_app.lib</ImportLibrary>
+      <ProgramDataBaseFile>$(SolutionDir)\..\..\..\/c/windows/build32/bin/Debug/test_app.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -132,7 +132,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <CompileAs>CompileAsC</CompileAs>
       <ExceptionHandling>
@@ -152,10 +152,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -168,8 +168,8 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>H:/Work/ui2c.git/c/windows/build32/lib/Release/test_app.lib</ImportLibrary>
-      <ProgramDataBaseFile>H:/Work/ui2c.git/c/windows/build32/bin/Release/test_app.pdb</ProgramDataBaseFile>
+      <ImportLibrary>$(SolutionDir)\..\..\..\/c/windows/build32/lib/Release/test_app.lib</ImportLibrary>
+      <ProgramDataBaseFile>$(SolutionDir)\..\..\..\/c/windows/build32/bin/Release/test_app.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -178,7 +178,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <CompileAs>CompileAsC</CompileAs>
       <ExceptionHandling>
@@ -198,10 +198,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -214,8 +214,8 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>H:/Work/ui2c.git/c/windows/build32/lib/MinSizeRel/test_app.lib</ImportLibrary>
-      <ProgramDataBaseFile>H:/Work/ui2c.git/c/windows/build32/bin/MinSizeRel/test_app.pdb</ProgramDataBaseFile>
+      <ImportLibrary>$(SolutionDir)\..\..\..\/c/windows/build32/lib/MinSizeRel/test_app.lib</ImportLibrary>
+      <ProgramDataBaseFile>$(SolutionDir)\..\..\..\/c/windows/build32/bin/MinSizeRel/test_app.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -224,7 +224,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <CompileAs>CompileAsC</CompileAs>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -243,10 +243,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -259,8 +259,8 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:X86</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>H:/Work/ui2c.git/c/windows/build32/lib/RelWithDebInfo/test_app.lib</ImportLibrary>
-      <ProgramDataBaseFile>H:/Work/ui2c.git/c/windows/build32/bin/RelWithDebInfo/test_app.pdb</ProgramDataBaseFile>
+      <ImportLibrary>$(SolutionDir)\..\..\..\/c/windows/build32/lib/RelWithDebInfo/test_app.lib</ImportLibrary>
+      <ProgramDataBaseFile>$(SolutionDir)\..\..\..\/c/windows/build32/bin/RelWithDebInfo/test_app.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -268,10 +268,10 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="H:\Work\ui2c.git\c\windows\test.c" />
+    <ClCompile Include="$(SolutionDir)\..\..\..\\c\windows\test.c" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="H:\Work\ui2c.git\c\windows\build32\ui2c_static.vcxproj">
+    <ProjectReference Include="$(SolutionDir)\..\..\..\\c\windows\build32\ui2c_static.vcxproj">
       <Project>{4C56B595-BCFD-3049-868D-BA212AE2A0E0}</Project>
       <Name>ui2c_static</Name>
     </ProjectReference>

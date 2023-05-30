@@ -66,7 +66,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -76,7 +76,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -86,7 +86,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <Midl>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -96,7 +96,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <Midl>
-      <AdditionalIncludeDirectories>H:\Work\ui2c.git\c\windows\.;H:\Work\ui2c.git\c\windows\..\..\arduino;H:\Work\ui2c.git\c\windows\..\inc;H:\Work\ui2c.git\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\\c\windows\.;$(SolutionDir)\..\..\..\\c\windows\..\..\arduino;$(SolutionDir)\..\..\..\\c\windows\..\inc;$(SolutionDir)\..\..\..\\c\windows\..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -107,15 +107,15 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="H:\Work\ui2c.git\c\windows\build64\test_app.vcxproj">
+    <ProjectReference Include="$(SolutionDir)\..\..\..\\c\windows\build64\test_app.vcxproj">
       <Project>{47B8AE67-2212-3174-B539-8F84E329F0B4}</Project>
       <Name>test_app</Name>
     </ProjectReference>
-    <ProjectReference Include="H:\Work\ui2c.git\c\windows\build64\ui2c_shared.vcxproj">
+    <ProjectReference Include="$(SolutionDir)\..\..\..\\c\windows\build64\ui2c_shared.vcxproj">
       <Project>{D4D0B4CA-6C8B-3905-BDD9-5A229E4B7B3D}</Project>
       <Name>ui2c_shared</Name>
     </ProjectReference>
-    <ProjectReference Include="H:\Work\ui2c.git\c\windows\build64\ui2c_static.vcxproj">
+    <ProjectReference Include="$(SolutionDir)\..\..\..\\c\windows\build64\ui2c_static.vcxproj">
       <Project>{7AC30D43-8126-3E83-816A-F1B6B20A7AA5}</Project>
       <Name>ui2c_static</Name>
     </ProjectReference>

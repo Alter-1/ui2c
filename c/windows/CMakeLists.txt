@@ -29,6 +29,7 @@ set_target_properties(ui2c_static PROPERTIES OUTPUT_NAME "ui2c_static")
 add_library(ui2c_shared SHARED ${LIBRARY_SOURCES})
 set_target_properties(ui2c_shared PROPERTIES OUTPUT_NAME "ui2c_shared")
 if (MSVC)    
+    target_sources(ui2c_static PRIVATE ui2c.def)
     target_sources(ui2c_shared PRIVATE ui2c.def)
 endif()
 
