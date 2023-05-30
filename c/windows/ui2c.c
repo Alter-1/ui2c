@@ -136,7 +136,7 @@ HANDLE _ui2c_open(HANDLE hSerial, int speed) {
     }
 
     // Configure the timeouts for read and write operations
-    timeouts.ReadIntervalTimeout = 0; // MAXWORD ?
+    timeouts.ReadIntervalTimeout = 100; // MAXWORD ?
     timeouts.ReadTotalTimeoutConstant = 100;
     timeouts.ReadTotalTimeoutMultiplier = 0;
     timeouts.WriteTotalTimeoutConstant = 100;
@@ -187,7 +187,7 @@ int __stdcall ui2c_probe(HANDLE hSerial) {
     Sleep(1500); // Wait for device to start up
 
     DWORD bytesWritten, bytesRead;
-    if (!WriteFile(hSerial, UI2C_CMD_VERSION, (DWORD)strlen(UI2C_CMD_VERSION), &bytesWritten, NULL)) {
+    if (!WriteFile(hSerial, UI2C_CMD_VERSION "\n", (DWORD)strlen(UI2C_CMD_VERSION), &bytesWritten, NULL)) {
         printf("Failed to write to UART\n");
         return 0;
     }
