@@ -323,9 +323,9 @@ void __stdcall ui2c_rdwr(HANDLE hSerial, struct i2c_msg** msgs, int num_msgs) {
                 char logstr[256];
                 bytesRead = 0;
                 if (!ReadFile(hSerial, logstr, sizeof(logstr) - 1, &bytesRead, NULL)) {
-                    printf("UI2C communication timeout\n");
+                    //printf("UI2C communication timeout\n");
                     // Cleanup resources and handle the error
-                    return;
+                    continue;
                 }
                 if (bytesRead > 0) {
                     logstr[bytesRead] = '\0';
