@@ -117,7 +117,7 @@ def probe_ui2c_device(dev_name, speed=115200):
         #print(dev_name)
         fd = serial.Serial(dev_name, speed,  bytesize=8, parity='N', stopbits=1, timeout=1.1)
         # Send the command 'version?'
-        time.sleep(1.5) # wait for device to start up
+        time.sleep(1.6) # wait for device to start u
 
         fd.write(b'version?\n')
 

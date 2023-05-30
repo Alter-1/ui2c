@@ -28,7 +28,10 @@ void i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length) {
 }
 
 void i2c_msg_free(struct i2c_msg* msg) {
+    if(!msg->buf)
+        return;
     free(msg->buf);
+    msg->buf = NULL;
 }
 
 speed_t get_termios_baudrate(int baudrate) {
@@ -115,7 +118,7 @@ int ui2c_open(const char *dev_name, int speed) {
     options.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL); // Disable any special handling of received bytes
 
     // Set the timeout value
-    options.c_cc[VTIME] = 10; // 1 second timeout (10 * 0.1 seconds)
+    options.c_cc[VTIME] = 1; // 1 second timeout (10 * 0.1 seconds)
 
     if(tcsetattr(fd, TCSANOW, &options) == -1) {
         perror("Failed to set serial port attributes");
@@ -132,18 +135,26 @@ void ui2c_close(int fd) {
 
 int ui2c_probe(int fd) {
     char response[256] = {0};
+    ssize_t bytes_read;
 
-    usleep(1500000); // Wait for device to start up
+    //usleep(1500000); // Wait for device to start up
+    usleep(1600000); // Wait for device to start up
 
-    write(fd, UI2C_CMD_VERSION "\n", strlen(UI2C_CMD_VERSION)+1);
+    for(int i=0; i<3; i++) {
+        write(fd, UI2C_CMD_VERSION "\n", strlen(UI2C_CMD_VERSION)+1);
 
-    ssize_t bytes_read = read(fd, response, sizeof(response) - 1);
-    if (bytes_read < 0) {
-        printf("Failed to read from UART\n");
-        return 0;
+        bytes_read = read(fd, response, sizeof(response) - 1);
+        if (bytes_read < 0) {
+            printf("Failed to read from UART\n");
+            return 0;
+        }
+        if(bytes_read > 0) {
+            break;
+        }
     }
 
     response[bytes_read] = '\0';
+    //printf("%s\n", response);
 
     if (strstr(response, "UI2C") != NULL) {
         return 1;
@@ -304,7 +315,7 @@ void ui2c_rdwr(int fd, struct i2c_msg **msgs, int num_msgs) {
                 }
             }
 
-            if (msg->flags & I2C_M_RD) {
+            if (msg->flags & I2C_M_RD && length) {
                 reply = (uint8_t*)malloc(length);
                 ssize_t bytes_read = read(fd, reply, length);
                 if (bytes_read > 0) {

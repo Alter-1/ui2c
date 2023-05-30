@@ -184,19 +184,26 @@ DLL_EXPORT
 int __stdcall ui2c_probe(HANDLE hSerial) {
     char response[256] = {0};
 
-    Sleep(1500); // Wait for device to start up
+    Sleep(1600); // Wait for device to start up + 1 sec in ReadFile
 
     DWORD bytesWritten, bytesRead;
-    if (!WriteFile(hSerial, UI2C_CMD_VERSION "\n", (DWORD)strlen(UI2C_CMD_VERSION), &bytesWritten, NULL)) {
-        printf("Failed to write to UART\n");
-        return 0;
-    }
 
-    if (!ReadFile(hSerial, response, sizeof(response) - 1, &bytesRead, NULL)) {
-        printf("Failed to read from UART\n");
-        return 0;
-    }
+    for(int i=0; i<3; i++) {
+        //ReadFile(hSerial, response, sizeof(response) - 1, &bytesRead, NULL); // // readout buffer
 
+        if (!WriteFile(hSerial, UI2C_CMD_VERSION "\n", (DWORD)strlen(UI2C_CMD_VERSION), &bytesWritten, NULL)) {
+            printf("Failed to write to UART\n");
+            return 0;
+        }
+
+        if (!ReadFile(hSerial, response, sizeof(response) - 1, &bytesRead, NULL)) {
+            printf("Failed to read from UART\n");
+            return 0;
+        }
+        if(bytesRead > 0) {
+            break;
+        }
+    }
     response[bytesRead] = '\0';
 
     if (strstr(response, "UI2C") != NULL) {
