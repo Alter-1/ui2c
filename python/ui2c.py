@@ -4,7 +4,7 @@ import time
 #from smbus2 import i2c_msg
 from ctypes import c_uint32, c_uint8, c_uint16, c_char, POINTER, Structure, Array, Union, create_string_buffer, string_at
 
-verbose      = False      # python logging
+verbose      = 0          # python logging
 ui2c_logging = False      # request UI2C internal debug logs
 
 # i2c_msg flags from uapi/linux/i2c.h
@@ -16,7 +16,10 @@ MODE_RAW         = 0            # Raw mode, packet format:
                                 # <length><I2C addr>[<i2C addr2>]<data bytes>
                                 # <length><I2C addr + RD>[<i2C addr2>]<req length>
                                 # <length><0xff><CMD><params>
+                                # if reply data length is greater than 0xf0, it is passed as 0xff <length>
+                                # values 0xf0-0xff are not used for error codes
                                 # 1st byte <length> doesn't include itself and I2C addr, only data block (for RD=1 is always 1)
+
 MODE_Coptonix    = 1            # simulate Coptonix #020101 I2C RS232 Adapter, see https://coptonix.com/wp-content/uploads/2020/08/i2crs232slave.pdf
 MODE_Manual      = 2            # similar to MODE_Coptonix, but with local echo and option for I2C device reply size limit
 
@@ -24,13 +27,31 @@ MODE_Manual      = 2            # similar to MODE_Coptonix, but with local echo 
 UI2C_RAW_ERR_PREFIX  =  0xff    # some error occured, next byte contains error code (see Wire.endTransmission())
                                 # if reply data length is greater than 0xf0, it is passed as 0xff <length>
                                 # values 0xf0-0xff are not used for error codes
+                                # <length>                        // RAW write confirmation
+                                # <length><data bytes>            // RAW read reply
+                                # 0xff<F-length><data bytes>      // long RAW read reply
+                                # 0xff 0x80 <length><data bytes>  // read reply for proxy/sniffer
+                                # 0xff 0x00                       // write confirmation for proxy/sniffer
+                                # 0xff <error>                    // error report
+                                # 0xfe <log data> <CR>            // RAW log
+
+UI2C_FF_LEN_THRESHOLD     =    0xf0  # length encoded with 2 bytes
+
+UI2C_2W_STATUS_OK         =    0x00  # followed by <length>, for sniffer/proxy mode
+UI2C_2W_ERR_TOO_LONG      =    0x01  # data too logs
+UI2C_2W_ERR_ADDR_NACK     =    0x02  # addr NACK
+UI2C_2W_ERR_DATA_NACK     =    0x03  # data NACK
+UI2C_2W_ERR_UNKNOWN       =    0x04  # general error
+UI2C_2W_ERR_TIMEOUT       =    0x05  # timeout
+UI2C_2W_STATUS_RD_OK      =    0x80  # followed by <length><reply data bytes>, for sniffer/proxy mode
+
 UI2C_RAW_LOG_PREFIX  =  0xfe    # UI2C log message, terminated with \n character, are sent when logging is enabled
 
 # request (starting from I2C addr)
 UI2C_RAW_CMD_PREFIX  =  0xff    # corresponds to invalid I2C address and used as special command prefix. Next byte is treated as command, see other UI2C_RAW_CMD_xxx below
 UI2C_RAW_CMD_MODE    =  0xff    # switch between RAW (native) and Coptonix #020101 mode. Next byte is treated as mode, see MODE_xxx
 UI2C_RAW_CMD_BEGIN   =  0xfe    # acquire/release I2C bus for sequential transactions, next byte 0/1 treated as release(0)/acquire(1)
-UI2C_RAW_CMD_LOG     =  0xfd    # change logging level. Next byte: 0 - disabled, 1 - enabled, 2+ - reserved
+UI2C_RAW_CMD_LOG     =  0xfd    # change logging level. Next byte: 0 - disabled, 1-3 used, 4+ - reserved
 
 class i2c_msg(Structure):
     """
@@ -117,7 +138,7 @@ def probe_ui2c_device(dev_name, speed=115200):
         #print(dev_name)
         fd = serial.Serial(dev_name, speed,  bytesize=8, parity='N', stopbits=1, timeout=1.1)
         # Send the command 'version?'
-        time.sleep(1.6) # wait for device to start u
+        time.sleep(1.5) # wait for device to start up
 
         fd.write(b'version?\n')
 
@@ -266,7 +287,7 @@ class UartI2C(object):
 
             b = self._i2c_msg_to_raw(i2c_msg)
             #print("i2c_msg.flags: "+str(i2c_msg.flags))
-            if(verbose):
+            if(verbose>2):
                 print("      try send")
                 print(b)
             #for d in b:
@@ -278,7 +299,7 @@ class UartI2C(object):
             #if((i2c_msg.flags & I2C_M_RD) == I2C_M_RD):
             while(True):
                 a = self.fd.read()
-                if(verbose):
+                if(verbose>2):
                     print("  reply:")
                     print(a)
                 if(a == b''):
@@ -297,9 +318,9 @@ class UartI2C(object):
                     if(err == b''):
                         raise IOError("UI2C Error status timeout: "+str(err))
                     err = ord(err)
-                    if(err == 0):
+                    if(err == UI2C_2W_STATUS_OK):  # 0
                         pass
-                    elif(err>=0xf0):
+                    elif(err>=UI2C_FF_LEN_THRESHOLD):  # 0xf0
                         length=err
                     else:
                         txt_err = "Unknown"
@@ -318,13 +339,13 @@ class UartI2C(object):
 
                 # end if(UI2C_RAW_ERR_PREFIX)
 
-                if(verbose):
+                if(verbose>1):
                     print("length: "+str(length))
                     print("i2c_msg.flags: "+str(i2c_msg.flags))
 
                 if((i2c_msg.flags & I2C_M_RD) == I2C_M_RD):
-                    if(verbose):
-                        print("try read: ")
+                    if(verbose>1):
+                        print("  sending: ")
                     reply = self.fd.read(length)
                     i2c_msg.len = length
                     #i2c_msg.buf = reply
