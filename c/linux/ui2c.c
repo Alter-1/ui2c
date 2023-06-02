@@ -17,7 +17,7 @@ void i2c_msg_read(struct i2c_msg* msg, int address, int length) {
     msg->flags = I2C_M_RD;
     msg->len = (uint16_t)length;
     msg->buf = (uint8_t*)malloc(length * sizeof(uint8_t));
-}
+} // end i2c_msg_read()
 
 void i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length) {
     msg->addr = (uint16_t)address;
@@ -25,14 +25,14 @@ void i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length) {
     msg->len = (uint16_t)length;
     msg->buf = (uint8_t*)malloc(length * sizeof(uint8_t));
     memcpy(msg->buf, data, length);
-}
+} // end i2c_msg_write()
 
 void i2c_msg_free(struct i2c_msg* msg) {
     if(!msg->buf)
         return;
     free(msg->buf);
     msg->buf = NULL;
-}
+} // end i2c_msg_free()
 
 speed_t get_termios_baudrate(int baudrate) {
     switch (baudrate) {
@@ -77,7 +77,7 @@ speed_t get_termios_baudrate(int baudrate) {
             printf("Unsupported baud rate\n");
             return -1;
     }
-}
+} // end get_dcb_baudrate()
 
 int ui2c_open(const char *dev_name, int speed) {
     int fd;
@@ -131,7 +131,7 @@ int ui2c_open(const char *dev_name, int speed) {
 
 void ui2c_close(int fd) {
     close(fd);
-}
+} // end ui2c_close()
 
 int ui2c_probe(int fd) {
     char response[256] = {0};
@@ -163,7 +163,7 @@ int ui2c_probe(int fd) {
     } else {
         return 0;
     }
-}
+} // end ui2c_probe()
 
 int probe_ui2c_device(const char *dev_name, int speed) {
     int fd = ui2c_open(dev_name, speed);
@@ -177,7 +177,7 @@ int probe_ui2c_device(const char *dev_name, int speed) {
     ui2c_close(fd);
 
     return result;
-}
+} // end probe_ui2c_device()
 
 unsigned char *ui2c_msg_to_raw(struct i2c_msg *msg) {
     if (msg->len > I2C_MAX_TRANSFER) {
@@ -224,17 +224,17 @@ unsigned char *ui2c_msg_to_raw(struct i2c_msg *msg) {
     }
 
     return b;
-}
+} // end ui2c_msg_to_raw()
 
 void ui2c_start_stop(int fd, unsigned char bStart) {
     unsigned char b[4] = {2, UI2C_RAW_CMD_PREFIX, UI2C_RAW_CMD_BEGIN, bStart};
     write(fd, b, sizeof(b));
-}
+} // end ui2c_start_stop()
 
 void ui2c_enable_logging(int fd, unsigned char uLevel) {
     unsigned char b[4] = {2, UI2C_RAW_CMD_PREFIX, UI2C_RAW_CMD_LOG, uLevel};
     write(fd, b, sizeof(b));
-}
+} // end ui2c_enable_logging()
 
 void ui2c_rdwr(int fd, struct i2c_msg **msgs, int num_msgs) {
     // End previous transaction if any
@@ -335,5 +335,5 @@ void ui2c_rdwr(int fd, struct i2c_msg **msgs, int num_msgs) {
     // End transaction
     ui2c_start_stop(fd, 0);
 
-}
+} // end ui2c_rdwr()
 
