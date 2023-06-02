@@ -1,0 +1,117 @@
+#### i2c_msg Structure
+
+Represents an I2C message for read or write operations.
+
+    
+    
+    struct i2c_msg {
+        uint16_t addr;   /**< The address of the I2C device. */
+        uint16_t flags;  /**< The flags for the I2C message. */
+        uint16_t len;    /**< The length of the data buffer. */
+        uint8_t* buf;    /**< The pointer to the data buffer. */
+    };
+
+#### i2c_msg_read
+
+Create Read data request from an I2C device in the provided i2c_msg structure.
+
+    
+    
+    void i2c_msg_read(struct i2c_msg* msg, int address, int length);
+
+#### i2c_msg_write
+
+Create Write data request to an I2C device in the provided i2c_msg structure.
+
+    
+    
+    void i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length);
+
+#### i2c_msg_free
+
+Frees the resources associated with an i2c_msg structure.
+
+    
+    
+    void i2c_msg_free(struct i2c_msg* msg);
+
+#### ui2c_open
+
+Opens the serial port with UART-to-I2C adapter for communication.
+
+**Parameters:**
+
+  * `dev_name` \- The name of the device (serial port) to open. Examples: "COM1" (Windows), "/dev/ttyUSB0" (Linux).
+  * `speed` \- The speed of the UART communication.
+
+    
+    
+    F_HANDLE ui2c_open(const char *dev_name, int speed);
+
+#### ui2c_close
+
+Closes port with the UART-to-I2C adapter device.
+
+    
+    
+    void ui2c_close(F_HANDLE fd);
+
+#### ui2c_probe
+
+Probes the serial port for UART-to-I2C adapter presence.
+
+**Parameters:**
+
+  * `fd` \- The handle to the serial port.
+
+**Returns:** 1 if the device is present, 0 otherwise.
+
+    
+    
+    int ui2c_probe(F_HANDLE fd);
+
+#### probe_ui2c_device
+
+Probes a serial port for UART-to-I2C adapter presence by name.
+
+**Parameters:**
+
+  * `dev_name` \- The name of the device (serial port) to probe. Examples: "COM1" (Windows), "/dev/ttyUSB0" (Linux).
+  * `speed` \- The speed of the UART communication.
+
+**Returns:** 1 if the device is present, 0 otherwise.
+
+    
+    
+    int probe_ui2c_device(const char *dev_name, int speed);
+
+#### ui2c_enable_logging
+
+Sets logging level on the UART-to-I2C adapter device.
+
+**Parameters:**
+
+  * `fd` \- The handle to the UART-to-I2C adapter device.
+  * `uLevel` \- The logging level.
+
+    
+    
+    void ui2c_enable_logging(F_HANDLE fd, unsigned char uLevel);
+
+#### ui2c_rdwr
+
+Performs read and write operations with the I2C device via UART-to-I2C adapter
+according to the provided i2c_msg structures. Don't release I2C bus between
+operations.
+
+**Parameters:**
+
+  * `fd` \- The handle to the UART-to-I2C adapter device.
+  * `msgs` \- An array of i2c_msg structures containing the read and write operations.
+  * `num_msgs` \- The number of i2c_msg structures in the array.
+
+    
+    
+    void ui2c_rdwr(F_HANDLE fd, struct i2c_msg **msgs, int num_msgs);
+
+
