@@ -8,32 +8,13 @@
 #include <usb-i2c.h>
 #include <ui2c.h>
 
-/*
-// Function to convert I2C_TRANSFER_S to i2c_msg
-void i2c_transfer_to_i2c_msg(I2C_TRANSFER_S* transfer, struct i2c_msg* msg) {
-    msg->addr = (uint16_t)transfer->Address;
-    msg->flags = (uint16_t)((transfer->Flags & SLAVE_ADDRESS_MODE_10BIT) ? I2C_M_TEN : 0);
-    msg->len = (uint16_t)transfer->Length;
-    msg->buf = (uint8_t*)malloc(transfer->Length * sizeof(uint8_t));
-    memcpy(msg->buf, transfer->Buffer, transfer->Length);
-}
-
-// Function to convert i2c_msg to I2C_TRANSFER_S
-void i2c_msg_to_i2c_transfer(struct i2c_msg* msg, I2C_TRANSFER_S* transfer) {
-    transfer->Address = (ULONG)msg->addr;
-    transfer->Flags = (ULONG)((msg->flags & I2C_M_TEN) ? SLAVE_ADDRESS_MODE_10BIT : 0);
-    transfer->Length = (ULONG)msg->len;
-    transfer->Buffer = msg->buf;
-}
-*/
-
 DLL_EXPORT
 void __stdcall i2c_msg_read(struct i2c_msg* msg, int address, int length) {
     msg->addr = (uint16_t)address;
     msg->flags = I2C_M_RD;
     msg->len = (uint16_t)length;
     msg->buf = (uint8_t*)malloc(length * sizeof(uint8_t));
-}
+} // end i2c_msg_read()
 
 DLL_EXPORT 
 void __stdcall i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length) {
@@ -42,12 +23,13 @@ void __stdcall i2c_msg_write(struct i2c_msg* msg, int address, char* data, int l
     msg->len = (uint16_t)length;
     msg->buf = (uint8_t*)malloc(length * sizeof(uint8_t));
     memcpy(msg->buf, data, length);
-}
+} // end i2c_msg_write()
 
 DLL_EXPORT 
 void __stdcall i2c_msg_free(struct i2c_msg* msg) {
     free(msg->buf);
-}
+    msg->buf = NULL;
+} // end i2c_msg_free()
 
 DWORD get_dcb_baudrate(int baudrate) {
     switch (baudrate) {
@@ -94,13 +76,15 @@ DWORD get_dcb_baudrate(int baudrate) {
             printf("Unsupported baud rate\n");
             return (DWORD)-1;
     }
-}
+} // end get_dcb_baudrate()
 
 HANDLE _ui2c_open(HANDLE hSerial, int speed) {
 
     DCB dcbSerialParams = { 0 };
     COMMTIMEOUTS timeouts;
     dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
+
+    SetupComm(hSerial, 4096, 4096);
 
     if (!GetCommState(hSerial, &dcbSerialParams)) {
         printf("Failed to get serial port state\n");
@@ -118,6 +102,7 @@ HANDLE _ui2c_open(HANDLE hSerial, int speed) {
     dcbSerialParams.ByteSize = 8;
     dcbSerialParams.StopBits = ONESTOPBIT;
     dcbSerialParams.Parity = NOPARITY;
+
     dcbSerialParams.fDtrControl = DTR_CONTROL_DISABLE;
     dcbSerialParams.fRtsControl = RTS_CONTROL_DISABLE;
     dcbSerialParams.fOutxCtsFlow = FALSE;
@@ -148,37 +133,47 @@ HANDLE _ui2c_open(HANDLE hSerial, int speed) {
         return INVALID_HANDLE_VALUE;
     }
 
+    PurgeComm(hSerial, PURGE_TXCLEAR | PURGE_TXABORT | PURGE_RXCLEAR | PURGE_RXABORT);
+
     return hSerial;
-}
+} // end _ui2c_open()
+
+void _clear_com_error(HANDLE hSerial)
+{
+    DWORD dwErrorFlags;
+   	COMSTAT ComStat;
+
+   	ClearCommError( hSerial, &dwErrorFlags, &ComStat );
+} // end _clear_com_error()
 
 DLL_EXPORT 
 HANDLE __stdcall ui2c_openA(const char* dev_name, int speed) {
     HANDLE hSerial;
 
-    hSerial = CreateFileA(dev_name, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+    hSerial = CreateFileA(dev_name, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
     if (hSerial == INVALID_HANDLE_VALUE) {
         printf("Failed to open UART\n");
         return INVALID_HANDLE_VALUE;
     }
     return _ui2c_open(hSerial, speed);
-}
+} // end ui2c_openA()
 
 DLL_EXPORT 
 HANDLE __stdcall ui2c_openW(const WCHAR* dev_name, int speed) {
     HANDLE hSerial;
 
-    hSerial = CreateFileW(dev_name, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+    hSerial = CreateFileW(dev_name, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
     if (hSerial == INVALID_HANDLE_VALUE) {
         printf("Failed to open UART\n");
         return INVALID_HANDLE_VALUE;
     }
     return _ui2c_open(hSerial, speed);
-}
+} // end ui2c_openW()
 
 DLL_EXPORT 
 void __stdcall ui2c_close(HANDLE hSerial) {
     CloseHandle(hSerial);
-}
+} // end ui2c_close()
 
 DLL_EXPORT 
 int __stdcall ui2c_probe(HANDLE hSerial) {
@@ -189,31 +184,39 @@ int __stdcall ui2c_probe(HANDLE hSerial) {
     DWORD bytesWritten, bytesRead;
 
     for(int i=0; i<3; i++) {
-        //ReadFile(hSerial, response, sizeof(response) - 1, &bytesRead, NULL); // // readout buffer
+        PurgeComm(hSerial, PURGE_TXCLEAR | PURGE_TXABORT | PURGE_RXCLEAR | PURGE_RXABORT);
 
-        if (!WriteFile(hSerial, UI2C_CMD_VERSION "\n", (DWORD)strlen(UI2C_CMD_VERSION), &bytesWritten, NULL)) {
+        if (!WriteFile(hSerial, UI2C_CMD_VERSION "\n", (DWORD)strlen(UI2C_CMD_VERSION) + 1, &bytesWritten, NULL)) {
             printf("Failed to write to UART\n");
             return 0;
         }
+        printf("  %d writen UART\n", bytesWritten);
 
         Sleep(CMD_TIMEOUT); // Wait for device to get timeout and reply
+
+        DWORD dwErrorFlags;
+       	COMSTAT ComStat;
+
+       	ClearCommError( hSerial, &dwErrorFlags, &ComStat );
 
         if (!ReadFile(hSerial, response, sizeof(response) - 1, &bytesRead, NULL)) {
             printf("Failed to read from UART\n");
             return 0;
         }
+        printf("  %d read from UART\n", bytesRead);
         if(bytesRead > 0) {
             break;
         }
     }
     response[bytesRead] = '\0';
+    printf("%s\n", response);
 
     if (strstr(response, "UI2C") != NULL) {
         return 1;
     } else {
         return 0;
     }
-}
+} // end ui2c_probe()
 
 DLL_EXPORT 
 int __stdcall probe_ui2c_device(const char* dev_name, int speed) {
@@ -229,7 +232,7 @@ int __stdcall probe_ui2c_device(const char* dev_name, int speed) {
     ui2c_close(hSerial);
 
     return result;
-}
+} // end probe_ui2c_device()
 
 unsigned char *ui2c_msg_to_raw(struct i2c_msg *msg) {
     if (msg->len > I2C_MAX_TRANSFER) {
@@ -276,21 +279,21 @@ unsigned char *ui2c_msg_to_raw(struct i2c_msg *msg) {
     }
 
     return b;
-}
+} // end ui2c_msg_to_raw()
 
 DLL_EXPORT 
 void __stdcall ui2c_start_stop(HANDLE hSerial, unsigned char bStart) {
     unsigned char b[4] = {2, UI2C_RAW_CMD_PREFIX, UI2C_RAW_CMD_BEGIN, bStart};
     DWORD bytesWritten;
     WriteFile(hSerial, b, sizeof(b), &bytesWritten, NULL);
-}
+} // end ui2c_start_stop()
 
 DLL_EXPORT 
 void __stdcall ui2c_enable_logging(HANDLE hSerial, unsigned char uLevel) {
     unsigned char b[4] = {2, UI2C_RAW_CMD_PREFIX, UI2C_RAW_CMD_LOG, uLevel};
     DWORD bytesWritten;
     WriteFile(hSerial, b, sizeof(b), &bytesWritten, NULL);
-}
+} // end ui2c_enable_logging()
 
 DLL_EXPORT 
 void __stdcall ui2c_rdwr(HANDLE hSerial, struct i2c_msg** msgs, int num_msgs) {
@@ -406,4 +409,4 @@ void __stdcall ui2c_rdwr(HANDLE hSerial, struct i2c_msg** msgs, int num_msgs) {
 
     // End transaction
     ui2c_start_stop(hSerial, 0);
-}
+} // end ui2c_rdwr()
