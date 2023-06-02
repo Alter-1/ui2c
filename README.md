@@ -10,7 +10,9 @@ Features:
 * data length up to 255 bytes
 * python adapter class ui2c.py, implementing i2c_msg from smbus2.SMBus to simplify integration with 
     I2C/smbus applications and/or porting from Raspbery to Linux/Windows
+* C/C++ API for integration with desktop applications under Linux/Windows
 * build-in logging feature in RAW mode, doesn't interfere with regular data flow 
+
     
 Origin: https://alter.org.ua/en/soft/arduino/ui2c/
 uses WireZeroCopy I2C library (https://github.com/Alter-1/WireZeroCopy/)
