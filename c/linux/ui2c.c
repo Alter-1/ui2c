@@ -143,6 +143,8 @@ int ui2c_probe(int fd) {
     for(int i=0; i<3; i++) {
         write(fd, UI2C_CMD_VERSION "\n", strlen(UI2C_CMD_VERSION)+1);
 
+        usleep(1000000); // Wait 1s until device get timeout and send reply
+
         bytes_read = read(fd, response, sizeof(response) - 1);
         if (bytes_read < 0) {
             printf("Failed to read from UART\n");

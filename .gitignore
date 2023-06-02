@@ -6,3 +6,10 @@ CMakeCache.txt
 /**/build/**
 !/**/build*/*.sln
 !/**/build*/*.vcxproj
+*.zip
+*.rar
+*.tgz
+*.gz
+bin
+*.o
+*.a
