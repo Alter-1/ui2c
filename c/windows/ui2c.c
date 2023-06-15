@@ -78,6 +78,11 @@ DWORD get_dcb_baudrate(int baudrate) {
     }
 } // end get_dcb_baudrate()
 
+void reset_input_buffer(HANDLE hSerial) {
+    //PurgeComm(hSerial, PURGE_RXCLEAR);
+    PurgeComm(hSerial, PURGE_TXCLEAR | PURGE_TXABORT | PURGE_RXCLEAR | PURGE_RXABORT);
+}
+
 HANDLE _ui2c_open(HANDLE hSerial, int speed) {
 
     DCB dcbSerialParams = { 0 };
@@ -133,7 +138,9 @@ HANDLE _ui2c_open(HANDLE hSerial, int speed) {
         return INVALID_HANDLE_VALUE;
     }
 
-    PurgeComm(hSerial, PURGE_TXCLEAR | PURGE_TXABORT | PURGE_RXCLEAR | PURGE_RXABORT);
+    Sleep(1600); // Wait for device to start up + 1 sec before ReadFile
+
+    reset_input_buffer(hSerial);
 
     return hSerial;
 } // end _ui2c_open()
@@ -179,8 +186,6 @@ DLL_EXPORT
 int __stdcall ui2c_probe(HANDLE hSerial) {
     char response[256] = {0};
 
-    Sleep(1600); // Wait for device to start up + 1 sec before ReadFile
-
     DWORD bytesWritten, bytesRead;
 
     for(int i=0; i<3; i++) {
@@ -198,6 +203,7 @@ int __stdcall ui2c_probe(HANDLE hSerial) {
        	COMSTAT ComStat;
 
        	ClearCommError( hSerial, &dwErrorFlags, &ComStat );
+        reset_input_buffer(hSerial);
 
         if (!ReadFile(hSerial, response, sizeof(response) - 1, &bytesRead, NULL)) {
             printf("Failed to read from UART\n");
@@ -296,7 +302,7 @@ void __stdcall ui2c_enable_logging(HANDLE hSerial, unsigned char uLevel) {
 } // end ui2c_enable_logging()
 
 DLL_EXPORT 
-void __stdcall ui2c_rdwr(HANDLE hSerial, struct i2c_msg** msgs, int num_msgs) {
+int __stdcall ui2c_rdwr(HANDLE hSerial, struct i2c_msg** msgs, int num_msgs) {
     // End previous transaction if any
     ui2c_start_stop(hSerial, 0);
 
@@ -326,7 +332,7 @@ void __stdcall ui2c_rdwr(HANDLE hSerial, struct i2c_msg** msgs, int num_msgs) {
                 // Timeout
                 printf("UI2C communication timeout\n");
                 // Cleanup resources and handle the error
-                return;
+                return UI2C_2W_ERR_TIMEOUT;
             }
 
             unsigned char length = a;
@@ -352,12 +358,12 @@ void __stdcall ui2c_rdwr(HANDLE hSerial, struct i2c_msg** msgs, int num_msgs) {
                 if (!ReadFile(hSerial, &err, 1, &bytesRead, NULL)) {
                     printf("UI2C communication timeout\n");
                     // Cleanup resources and handle the error
-                    return;
+                    return UI2C_2W_ERR_TIMEOUT;
                 }
                 if (bytesRead == 0) {
                     printf("UI2C Error status timeout\n");
                     // Cleanup resources and handle the error
-                    return;
+                    return UI2C_2W_ERR_TIMEOUT;
                 }
 
                 if (err == UI2C_2W_STATUS_OK) {
@@ -366,24 +372,24 @@ void __stdcall ui2c_rdwr(HANDLE hSerial, struct i2c_msg** msgs, int num_msgs) {
                 } else if (err >= UI2C_FF_LEN_THRESHOLD) {
                     length = err;
                 } else {
-                    const char* txt_err = "Unknown";
+                    const char* txt_err = "Unknown";   // 4 and  > 5
                     switch (err) {
-                        case 1:
+                        case UI2C_2W_ERR_TOO_LONG:     // 1
                             txt_err = "data too long";
                             break;
-                        case 2:
+                        case UI2C_2W_ERR_ADDR_NACK:    // 2
                             txt_err = "Addr NACK";
                             break;
-                        case 3:
+                        case UI2C_2W_ERR_DATA_NACK:    // 3
                             txt_err = "Data NACK";
                             break;
-                        case 5:
+                        case UI2C_2W_ERR_TIMEOUT:      // 5
                             txt_err = "Timeout";
                             break;
                     }
                     printf("I2C Error: %d: %s\n", err, txt_err);
                     // Cleanup resources and handle the error
-                    return;
+                    return err;
                 }
             }
 
@@ -409,4 +415,6 @@ void __stdcall ui2c_rdwr(HANDLE hSerial, struct i2c_msg** msgs, int num_msgs) {
 
     // End transaction
     ui2c_start_stop(hSerial, 0);
+
+    return UI2C_2W_STATUS_OK;
 } // end ui2c_rdwr()

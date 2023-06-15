@@ -12,6 +12,14 @@
 #include <linux/i2c.h>
 #include <usb-i2c.h>
 
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
+
+#ifndef max
+#define max(a,b)            (((a) > (b)) ? (a) : (b))
+#endif
+
 void i2c_msg_read(struct i2c_msg* msg, int address, int length) {
     msg->addr = (uint16_t)address;
     msg->flags = I2C_M_RD;
@@ -79,6 +87,10 @@ speed_t get_termios_baudrate(int baudrate) {
     }
 } // end get_dcb_baudrate()
 
+void reset_input_buffer(int fd) {
+    tcflush(fd, TCIFLUSH);
+}
+
 int ui2c_open(const char *dev_name, int speed) {
     int fd;
 
@@ -126,6 +138,9 @@ int ui2c_open(const char *dev_name, int speed) {
         return -1;
     }
 
+    usleep(1600000); // Wait for device to start up
+    reset_input_buffer(fd);
+
     return fd;
 }
 
@@ -133,19 +148,64 @@ void ui2c_close(int fd) {
     close(fd);
 } // end ui2c_close()
 
+ssize_t ui2c_read_timeout(int fd, void *buffer, size_t len, int timeout /* ms */) {
+    ssize_t total_bytes_read = 0;
+    int remaining_timeout = timeout;
+    int to = max(min(timeout/10, 100), 1);
+
+    while (remaining_timeout > 0) {
+        // Check the number of currently available bytes
+        int available_bytes;
+        if (ioctl(fd, FIONREAD, &available_bytes) == -1) {
+            perror("Failed to get available bytes");
+            return -1;
+        }
+
+        if (available_bytes > 0) {
+            // Read the available bytes up to the buffer length
+            ssize_t bytes_read = read(fd, ((char*)(buffer))+total_bytes_read, len);
+            if (bytes_read == -1) {
+                perror("Failed to read from serial port");
+                return -1;
+            }
+
+            total_bytes_read += bytes_read;
+            remaining_timeout = timeout;
+
+            // Check if there are more bytes available
+            if (bytes_read < available_bytes) {
+                // Sleep for a short delay before checking again
+                usleep(to*1000); // 100 microseconds
+            } else {
+                // All available bytes have been read
+                return total_bytes_read;
+            }
+        } else {
+            // No bytes available, sleep for a short delay before checking again
+            usleep(to*1000); // 100 microseconds
+        }
+
+        remaining_timeout -= to; // Subtract the delay time from the remaining timeout
+    }
+
+    // Timeout expired, return the total number of bytes read
+    return total_bytes_read;
+} // end ui2c_read_timeout()
+
 int ui2c_probe(int fd) {
     char response[256] = {0};
     ssize_t bytes_read;
 
     //usleep(1500000); // Wait for device to start up
-    usleep(1600000); // Wait for device to start up
 
     for(int i=0; i<3; i++) {
         write(fd, UI2C_CMD_VERSION "\n", strlen(UI2C_CMD_VERSION)+1);
 
         usleep(1000000); // Wait 1s until device get timeout and send reply
 
-        bytes_read = read(fd, response, sizeof(response) - 1);
+            printf("try read\n");
+        //bytes_read = read(fd, response, sizeof(response) - 1);
+        bytes_read = ui2c_read_timeout(fd, response, sizeof(response) - 1, 500 /*ms*/);
         if (bytes_read < 0) {
             printf("Failed to read from UART\n");
             return 0;
@@ -236,7 +296,7 @@ void ui2c_enable_logging(int fd, unsigned char uLevel) {
     write(fd, b, sizeof(b));
 } // end ui2c_enable_logging()
 
-void ui2c_rdwr(int fd, struct i2c_msg **msgs, int num_msgs) {
+int ui2c_rdwr(int fd, struct i2c_msg **msgs, int num_msgs) {
     // End previous transaction if any
     ui2c_start_stop(fd, 0);
 
@@ -266,7 +326,7 @@ void ui2c_rdwr(int fd, struct i2c_msg **msgs, int num_msgs) {
                 // Timeout
                 printf("UI2C communication timeout\n");
                 // Cleanup resources and handle the error
-                return;
+                return UI2C_2W_ERR_TIMEOUT;
             }
 
             unsigned char length = a;
@@ -287,7 +347,7 @@ void ui2c_rdwr(int fd, struct i2c_msg **msgs, int num_msgs) {
                 if (bytes_read == 0) {
                     printf("UI2C Error status timeout\n");
                     // Cleanup resources and handle the error
-                    return;
+                    return UI2C_2W_ERR_TIMEOUT;
                 }
 
                 if (err == UI2C_2W_STATUS_OK) {
@@ -296,24 +356,24 @@ void ui2c_rdwr(int fd, struct i2c_msg **msgs, int num_msgs) {
                 } else if (err >= UI2C_FF_LEN_THRESHOLD) {
                     length = err;
                 } else {
-                    const char *txt_err = "Unknown";
+                    const char *txt_err = "Unknown";   // 4 and > 5
                     switch (err) {
-                        case 1:
+                        case UI2C_2W_ERR_TOO_LONG:     // 1
                             txt_err = "data too long";
                             break;
-                        case 2:
+                        case UI2C_2W_ERR_ADDR_NACK:    // 2
                             txt_err = "Addr NACK";
                             break;
-                        case 3:
+                        case UI2C_2W_ERR_DATA_NACK:    // 3
                             txt_err = "Data NACK";
                             break;
-                        case 5:
+                        case UI2C_2W_ERR_TIMEOUT:      // 5
                             txt_err = "Timeout";
                             break;
                     }
                     printf("I2C Error: %d: %s\n", err, txt_err);
                     // Cleanup resources and handle the error
-                    return;
+                    return err;
                 }
             }
 
@@ -334,6 +394,8 @@ void ui2c_rdwr(int fd, struct i2c_msg **msgs, int num_msgs) {
 
     // End transaction
     ui2c_start_stop(fd, 0);
+
+    return UI2C_2W_STATUS_OK;
 
 } // end ui2c_rdwr()
 

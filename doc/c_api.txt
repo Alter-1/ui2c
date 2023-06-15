@@ -110,8 +110,17 @@ operations.
   * `msgs` \- An array of i2c_msg structures containing the read and write operations.
   * `num_msgs` \- The number of i2c_msg structures in the array.
 
+**Returns:** 0 on success, error code otherwise.
+
+  * UI2C_2W_STATUS_OK 0x00 // OK
+  * UI2C_2W_ERR_TOO_LONG 0x01 // data too logs
+  * UI2C_2W_ERR_ADDR_NACK 0x02 // addr NACK
+  * UI2C_2W_ERR_DATA_NACK 0x03 // data NACK
+  * UI2C_2W_ERR_UNKNOWN 0x04 // general error
+  * UI2C_2W_ERR_TIMEOUT 0x05 // timeout
+
     
     
-    void ui2c_rdwr(F_HANDLE fd, struct i2c_msg **msgs, int num_msgs);
+    int ui2c_rdwr(F_HANDLE fd, struct i2c_msg **msgs, int num_msgs);
 
 

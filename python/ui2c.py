@@ -136,20 +136,32 @@ class i2c_msg(Structure):
 def probe_ui2c_device(dev_name, speed=115200):
     try:
         #print(dev_name)
-        fd = serial.Serial(dev_name, speed,  bytesize=8, parity='N', stopbits=1, timeout=1.1)
+        # Note: open resets controller by default
+        fd = serial.Serial(dev_name, speed,  bytesize=8, parity='N', stopbits=1, timeout=1.1, 
+                        xonxoff=False, rtscts = False, dsrdtr = False )
         # Send the command 'version?'
         time.sleep(1.5) # wait for device to start up
+        fd.reset_input_buffer();
+        fd.reset_output_buffer();
 
-        fd.write(b'version?\n')
+        n=0;
+        while(n<3):
+            n = n+1
+            fd.write(b'version?\n')
+            time.sleep(1.0) # wait for command timeout
 
-        # Read the response
-        response = fd.readall().decode('ascii')
+            # Read the response
+            response = fd.readall().decode('ascii')
 
-        # Check if 'UI2C' substring is found in the response
-        if 'UI2C' in response:
-            return True
-        else:
-            return False
+            if(len(response) == 0):
+                continue
+
+            # Check if 'UI2C' substring is found in the response
+            if 'UI2C' in response:
+                return True
+        #end while
+
+        return False
 
     except serial.SerialException as e:
         print('Serial port error:', str(e))
@@ -181,7 +193,13 @@ class UartI2C(object):
         '''
         Open serial port with UART-I2C adapter connected, e.g. /dev/ttyUSB0 (linux) or COM11 (windows)
         '''
-        self.fd = serial.Serial(dev_name, self.speed, timeout=2) # 2 sec
+        self.fd = serial.Serial(dev_name, self.speed,  bytesize=8, parity='N', stopbits=1, timeout=2, 
+                        xonxoff=False, rtscts = False, dsrdtr = False )
+        #self.fd = serial.Serial(dev_name, self.speed, timeout=2) # 2 sec
+        time.sleep(1.5) # wait for device to start up
+        self.fd.reset_input_buffer();
+        self.fd.reset_output_buffer();
+
         logstr = self.fd.readline()
         if(ui2c_logging):
             self._enable_logging(1)
