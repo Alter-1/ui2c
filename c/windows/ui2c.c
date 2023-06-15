@@ -399,7 +399,7 @@ int __stdcall ui2c_rdwr(HANDLE hSerial, struct i2c_msg** msgs, int num_msgs) {
                 if (!ReadFile(hSerial, reply, length, &bytesRead, NULL)) {
                     printf("UI2C communication timeout\n");
                     // Cleanup resources and handle the error
-                    return;
+                    return UI2C_2W_ERR_TIMEOUT;
                 }
                 if (bytesRead > 0) {
                     msg->len = length;
