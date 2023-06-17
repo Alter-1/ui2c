@@ -41,7 +41,7 @@ uint8_t iobuffer[bufSz+1+MAX_CMD_PREFIX];
 #define i2cbuffer   iobuffer
 uint8_t* cmdbuffer = &(iobuffer[MAX_CMD_PREFIX]);
 
-int len = 0;                   // expected length of pcket ot be sent
+int len = 0;                   // expected length of packet ot be sent
 int pos = 0;                   // current position in input UART buffer
 int req_len = 0;               // requested length to be read
 int rpos = 0;                  // actually read from I2C bytes
