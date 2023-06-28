@@ -1,8 +1,12 @@
+""" UI2C adapter module
+(C) 2023 by Alexandr A. Telyatnikov aka Alter
+"""
 import serial
 import sys
 import time
 #from smbus2 import i2c_msg
 from ctypes import c_uint32, c_uint8, c_uint16, c_char, POINTER, Structure, Array, Union, create_string_buffer, string_at
+#import traceback
 
 verbose      = 0          # python logging
 ui2c_logging = False      # request UI2C internal debug logs
@@ -180,6 +184,7 @@ class UartI2C(object):
         if dev_name is not None:
             self.open(dev_name)
         self._pec = 0
+        self.last_err = 0;
  
     def __enter__(self):
         """Enter handler."""
@@ -283,6 +288,29 @@ class UartI2C(object):
         self.fd.write(b)
     #end _enable_logging()
 
+    def i2c_err_to_msg(self, err):
+        if(err == UI2C_2W_STATUS_OK):  # 0
+            pass
+        elif(err>=UI2C_FF_LEN_THRESHOLD):  # 0xf0
+            pass
+        else:
+            txt_err = "Unknown"
+            if(err == 1):
+                txt_err = "data too long"
+            elif(err == 2):
+                txt_err = "Addr NACK"
+            elif(err == 3):
+                txt_err = "Data NACK"
+            elif(err == 5):
+                txt_err = "Timeout"
+            #print("I2C Error: "+str(err)+": "+txt_err)
+            #raise IOError("I2C Error: "+str(err))
+            #raise OSError(121,"no ACK")
+            return txt_err
+        # end if(err>=0xf0)
+        return None
+    #end i2c_err_to_msg()
+
     def i2c_rdwr(self, *i2c_msgs):
         """
         Combine a series of i2c read and write operations in a single
@@ -293,6 +321,8 @@ class UartI2C(object):
         :type i2c_msgs: i2c_msg
         :rtype: None
         """
+
+        self.last_err = UI2C_2W_STATUS_OK
 
         # end previous transaction if any
         self._start_stop(0)
@@ -341,15 +371,8 @@ class UartI2C(object):
                     elif(err>=UI2C_FF_LEN_THRESHOLD):  # 0xf0
                         length=err
                     else:
-                        txt_err = "Unknown"
-                        if(err == 1):
-                            txt_err = "data too long"
-                        elif(err == 2):
-                            txt_err = "Addr NACK"
-                        elif(err == 3):
-                            txt_err = "Data NACK"
-                        elif(err == 5):
-                            txt_err = "Timeout"
+                        self.last_err = err
+                        txt_err = self.i2c_err_to_msg(err)
                         #print("I2C Error: "+str(err)+": "+txt_err)
                         #raise IOError("I2C Error: "+str(err))
                         raise OSError(121,"no ACK")
@@ -385,5 +408,38 @@ class UartI2C(object):
         self._start_stop(0)
 
     #end i2c_rdwr()
+
+    def i2c_probe_dev(self, dev_addr):
+
+        #verbose = 3
+        #self._enable_logging(1)
+        # end previous transaction if any
+        self._start_stop(0)
+
+        # begin transaction
+        self._start_stop(1)
+
+        #print("try write")
+        try:
+            part_read = i2c_msg.write(dev_addr, 2)
+            self.i2c_rdwr(part_read)
+            #part_write = i2c_msg.write(dev_addr, chr(0)+chr(0))
+            #self.i2c_rdwr(part_write)
+        except Exception as ex:
+            #print('ERR: '+ str(ex))
+            #log.error(e)
+            #lines = traceback.format_exception(type(ex), ex, ex.__traceback__)
+            #print(''.join(lines))
+            pass
+        # end try
+
+        # end transaction
+        self._start_stop(0)
+
+        if(self.last_err == UI2C_2W_ERR_DATA_NACK or self.last_err == UI2C_2W_STATUS_OK):
+            return True
+
+        return False
+    #end i2c_probe_dev()
 
 # end class UartI2C
