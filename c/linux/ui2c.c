@@ -20,19 +20,23 @@
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
 #endif
 
-void i2c_msg_read(struct i2c_msg* msg, int address, int length) {
+int i2c_msg_read(struct i2c_msg* msg, int address, int length) {
     msg->addr = (uint16_t)address;
     msg->flags = I2C_M_RD;
     msg->len = (uint16_t)length;
     msg->buf = (uint8_t*)malloc(length * sizeof(uint8_t));
+    return msg->buf != NULL;
 } // end i2c_msg_read()
 
-void i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length) {
+int i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length) {
     msg->addr = (uint16_t)address;
     msg->flags = 0;
     msg->len = (uint16_t)length;
     msg->buf = (uint8_t*)malloc(length * sizeof(uint8_t));
+    if(msg->buf == NULL)
+        return 0;
     memcpy(msg->buf, data, length);
+    return 1;
 } // end i2c_msg_write()
 
 void i2c_msg_free(struct i2c_msg* msg) {
@@ -399,3 +403,30 @@ int ui2c_rdwr(int fd, struct i2c_msg **msgs, int num_msgs) {
 
 } // end ui2c_rdwr()
 
+int i2c_probe_dev(int fd, int dev_addr)
+{
+    struct i2c_msg msg;
+    int err;
+
+    // End previous transaction if any
+    ui2c_start_stop(fd, 0);
+
+    // Begin transaction
+    ui2c_start_stop(fd, 1);
+
+    if(!i2c_msg_read(&msg, dev_addr, 2))        // read 2 bytes
+    {
+        return 0;
+    }
+
+    struct i2c_msg* msgs[1] = { &msg };
+    err = ui2c_rdwr(fd, &msgs[0], 1);
+
+    // End transaction
+    ui2c_start_stop(fd, 0);
+
+    i2c_msg_free(&msg);
+
+    return err == UI2C_2W_ERR_DATA_NACK || err == UI2C_2W_STATUS_OK;
+
+} // end i2c_probe_dev()

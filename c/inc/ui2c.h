@@ -27,8 +27,8 @@ struct i2c_msg {
 extern "C" {
 #endif
 
-DLL_EXPORT void __stdcall i2c_msg_read(struct i2c_msg* msg, int address, int length);
-DLL_EXPORT void __stdcall i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length);
+DLL_EXPORT int __stdcall i2c_msg_read(struct i2c_msg* msg, int address, int length);
+DLL_EXPORT int __stdcall i2c_msg_write(struct i2c_msg* msg, int address, char* data, int length);
 DLL_EXPORT void __stdcall i2c_msg_free(struct i2c_msg* msg);
 #ifdef WIN32
   DLL_EXPORT F_HANDLE __stdcall ui2c_openA(const char *dev_name, int speed);
@@ -46,7 +46,7 @@ DLL_EXPORT int  __stdcall ui2c_probe(F_HANDLE fd);
 DLL_EXPORT int  __stdcall probe_ui2c_device(const char *dev_name, int speed);
 DLL_EXPORT void __stdcall ui2c_enable_logging (F_HANDLE fd, unsigned char uLevel);
 DLL_EXPORT int  __stdcall ui2c_rdwr(F_HANDLE fd, struct i2c_msg **msgs, int num_msgs);
-
+DLL_EXPORT int  __stdcall i2c_probe_dev(F_HANDLE fd, int dev_addr);
 
 #ifdef __cplusplus
 }

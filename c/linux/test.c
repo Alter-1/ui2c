@@ -21,9 +21,15 @@ int main(int argc, char** argv) {
     if(uart_i2c <= 0)
         return -1;
 
-    printf("Probe...\n");
+    printf("Probe UI2C adapter...\n");
     if(!ui2c_probe(uart_i2c)) {
         printf("Probe UI2C failed\n");
+        return -1;
+    }
+
+    printf("Probe device...\n");
+    if(!i2c_probe_dev(uart_i2c, addr)) {
+        printf("Probe I2C device @0x%x failed\n", addr);
         return -1;
     }
 
