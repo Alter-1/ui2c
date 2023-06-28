@@ -430,10 +430,10 @@ BOOL __stdcall i2c_probe_dev(HANDLE hSerial, int dev_addr)
     int err;
 
     // End previous transaction if any
-    ui2c_start_stop(fd, 0);
+    ui2c_start_stop(hSerial, 0);
 
     // Begin transaction
-    ui2c_start_stop(fd, 1);
+    ui2c_start_stop(hSerial, 1);
 
     if(!i2c_msg_read(&msg, dev_addr, 2))        // read 2 bytes
     {
@@ -444,7 +444,7 @@ BOOL __stdcall i2c_probe_dev(HANDLE hSerial, int dev_addr)
     err = ui2c_rdwr(hSerial, &msgs[0], 1);
 
     // End transaction
-    ui2c_start_stop(fd, 0);
+    ui2c_start_stop(hSerial, 0);
 
     i2c_msg_free(&msg);
 
