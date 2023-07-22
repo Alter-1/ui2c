@@ -1,12 +1,11 @@
-""" UI2C adapter module
-(C) 2023 by Alexandr A. Telyatnikov aka Alter
-"""
 import serial
 import sys
 import time
 #from smbus2 import i2c_msg
 from ctypes import c_uint32, c_uint8, c_uint16, c_char, POINTER, Structure, Array, Union, create_string_buffer, string_at
 #import traceback
+
+#is_windows = hasattr(sys, 'getwindowsversion')
 
 verbose      = 0          # python logging
 ui2c_logging = False      # request UI2C internal debug logs
@@ -137,12 +136,33 @@ class i2c_msg(Structure):
 
 #end class i2c_msg
 
+def _open_port_internal(dev_name, speed, to):
+    #global is_windows
+    fd = None
+    try:
+        #if(is_windows):
+        #    fd = serial.Serial(dev_name, speed,  bytesize=8, parity='N', stopbits=1, timeout=to)
+        #else:
+        fd = serial.Serial(dev_name, speed,  bytesize=8, parity='N', stopbits=1, timeout=to, 
+                        xonxoff=False, rtscts = False, dsrdtr = False )
+        return fd
+    except serial.SerialException as e:
+        print('Serial port error:', str(e))
+
+#end _open_port_internal()
+
 def probe_ui2c_device(dev_name, speed=115200):
+    fd = None
     try:
         #print(dev_name)
         # Note: open resets controller by default
-        fd = serial.Serial(dev_name, speed,  bytesize=8, parity='N', stopbits=1, timeout=1.1, 
-                        xonxoff=False, rtscts = False, dsrdtr = False )
+        #fd = serial.Serial(dev_name, speed,  bytesize=8, parity='N', stopbits=1, timeout=1.1, 
+        #                xonxoff=False, rtscts = False, dsrdtr = False )
+
+        fd = _open_port_internal(dev_name, speed, 1.1)
+        if(fd == None):
+            return False
+
         # Send the command 'version?'
         time.sleep(1.5) # wait for device to start up
         fd.reset_input_buffer();
@@ -172,7 +192,8 @@ def probe_ui2c_device(dev_name, speed=115200):
         return False
 
     finally:
-        fd.close()
+        if(fd != None):
+            fd.close()
 
 #end probe_ui2c_device()
 
@@ -198,8 +219,14 @@ class UartI2C(object):
         '''
         Open serial port with UART-I2C adapter connected, e.g. /dev/ttyUSB0 (linux) or COM11 (windows)
         '''
-        self.fd = serial.Serial(dev_name, self.speed,  bytesize=8, parity='N', stopbits=1, timeout=2, 
-                        xonxoff=False, rtscts = False, dsrdtr = False )
+        #self.fd = serial.Serial(dev_name, self.speed,  bytesize=8, parity='N', stopbits=1, timeout=2, 
+        #                xonxoff=False, rtscts = False, dsrdtr = False )
+
+        self.fd = _open_port_internal(dev_name, self.speed, 2)
+        if(self.fd == None):
+            self.last_err = UI2C_2W_ERR_UNKNOWN
+            return
+
         #self.fd = serial.Serial(dev_name, self.speed, timeout=2) # 2 sec
         time.sleep(1.5) # wait for device to start up
         self.fd.reset_input_buffer();
